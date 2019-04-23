@@ -14,24 +14,23 @@
                 <v-list-tile
                         v-for="(item, index) in vragen"
                         :key="index"
-                        @click=""
-
+                        @click="selectItem(index)"
                 >
-                    <v-list-tile-title @click="selectItem(index)">{{ item.questionTitle }}</v-list-tile-title>
+                    <v-list-tile-title >{{ item.questionTitle }}</v-list-tile-title>
                 </v-list-tile>
             </v-list>
         </v-menu>
         <div v-else>
             <div v-for="(keuzes, index) in vragen[filterStatus].questionChoices">
-                <!--@click="emit(keuzes, filterStatus)">-->
-
-                <v-checkbox
-                        :label="keuzes" :value="vragen[filterStatus].questionChoices[index]" v-model="haha[filterStatus].choices"></v-checkbox></div>
+             <v-checkbox
+                :label="keuzes" :value="vragen[filterStatus].questionChoices[index]" v-model="haha[filterStatus].choices" color="#707171">
+             </v-checkbox>
+            </div>
 
             <v-btn @click="showMenu = true">Discard</v-btn>
             <v-btn @click="saveFilter(haha[filterStatus].choices, filterStatus)">Save</v-btn>
         </div>
-        {{showMenu}}
+
 
     </div>
 
@@ -64,11 +63,8 @@
             const array = [];
             for(let vraag in this.vragen){
                 array.push({"questionNr": vraag, choices: []});
-                for(let keuze in this.vragen[vraag].questionChoices){
+              }
 
-                }
-            }
-            //console.log(array);
             this.haha = array;
         }
     }

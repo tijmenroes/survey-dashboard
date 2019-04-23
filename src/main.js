@@ -20,10 +20,10 @@ new Vue({
   beforeMount(){
     this.supertof = this.$el.attributes['source'].value;
   },
-  components:{App},
-  template: '<App :source="supertof"/>',
-  // render: h => h(App, {
-  //   props:{},
-  // }),
+  //components:{App},
+//  template: '<App :source="supertof"/>',
+  render: h => h(App, {
+    props:{},
+  }),
 
 })

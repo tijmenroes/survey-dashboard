@@ -4,7 +4,7 @@
         <v-menu offset-y>
             <template v-slot:activator="{ on }">
                 <v-btn
-                        color="primary"
+                        color="#707171"
                         dark
                         round
                         v-on="on"
@@ -13,6 +13,7 @@
                     Export as
                     <v-icon right dark>keyboard_arrow_down</v-icon>
                 </v-btn>
+
             </template>
             <v-list>
                 <v-list-tile @click="handler('.png')">

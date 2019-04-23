@@ -2,8 +2,8 @@
 //
 module.exports = {
     publicPath: process.env.NODE_ENV === 'production'
-        ? 'reporter/dist/'
-        : 'reporter/',
+        ? '/Scripts/reporting/'
+        : '/Scripts/reporting/',
     configureWebpack: {
        //runtimeCompiler: true,
         resolve: {
@@ -14,15 +14,3 @@ module.exports = {
     }
 
 };
-
-// vue.config.js
-/*module.exports = {
-    transpileDependencies: [
-
-    ]
-}*/
-// module.exports = {
-//     publicPath: process.env.NODE_ENV === 'production'
-//         ? 'vuetify/dist/'
-//         : 'vuetifypoep/'
-// }
