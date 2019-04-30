@@ -1,6 +1,28 @@
 <template>
   <v-app class="app">
     <v-content>
+        {{$store.state.loading}}
+        <v-dialog
+                v-model="$store.state.loading"
+
+                persistent
+                width="300"
+        >
+            <v-card
+                    color="primary"
+                    dark
+            >
+                <v-card-text>
+                    Loading
+                    <v-progress-linear
+                            indeterminate
+                            color="white"
+                            class="mb-0"
+                    ></v-progress-linear>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+
       <div class="pageButtons">
       <span v-for="(button,index) in buttons"> <v-btn class="Vuebutton text-none" @click="pageNumber = index" flat depressed>{{button}}</v-btn> </span>
       </div>
@@ -33,17 +55,12 @@
 
             <v-divider class="pa-1"></v-divider>
               <v-btn dark round class="menuButton text-none" color="#475963"> Herstel pagina</v-btn>
-            <ExportComponent :toPrint="$refs" ></ExportComponent>
+            <ExportComponent :toPrint="$refs"></ExportComponent>
               <div class="headline">Filters</div>
               <v-divider></v-divider>
             <!--<export-component :toPrint="$refs" :vragen="vragen"></export-component>-->
-            <DataFilter :vragen="questions" @addFilter="FilterConfig"></DataFilter>
-            <div>
+            <DataFilter></DataFilter>
 
-              <v-btn flat class="text-none"
-                     v-for="(filter,index)  in $store.state.filters" :key="index" @click="delFilter(index)">
-                Q {{filter.Question}}: {{filter.Answer.toString()}}  <v-icon right small> close</v-icon></v-btn>
-            </div>
             </v-container>
           </v-card>
             </v-flex>
@@ -56,6 +73,7 @@
 
 import Overview from "./views/Overview.vue";
 import SurveyView from "./views/SurveyView.vue";
+
 // import Individual from './views/Individual.vue'
 import DataFilter from './components/Filter.vue'
 import ExportComponent from './components/ExportComponent.vue'
@@ -70,8 +88,9 @@ export default {
 
   data () {
     return {
-      pageNumber: 2,
+      pageNumber: 0,
       oldData: [],
+
       filters: [],
      users: [],
       poep:  {'answers': []},
@@ -97,45 +116,6 @@ export default {
 
     }
   },
-  methods: {
-FilterConfig(answer, question) {
-      const filterExists = this.filterExists(answer, question);
-      if (answer.length === 0) {
-        alert('Selecteer een filter!');
-      } else {
-        if (filterExists === false) {
-        //  this.addFilter(answer, question);
-          this.$store.commit('addFilter', {answer, question});
-          this.$store.commit('ConfigureAnswers');
-          console.log("Filter send to vuex");
-        } else if (filterExists === "bestaat") {
-            this.delFilter(question);
-            this.$store.commit('addFilter', {answer, question});
-            this.$store.commit('ConfigureAnswers');
-        } else {
-          alert('Die filter bestaat al!');
-        }
-      }
-    },
-    filterExists(answer, question){
-     // console.log(answer);
-      if (typeof this.filters[question] === 'undefined') {
-        return false
-      } else {
-        if (this.filters[question].Code[0].a === answer) {
-          return true;
-        } else {
-          return "bestaat";
-        }
-      }
-    },
-     delFilter(number){
-         this.$store.commit('delFilter', number);
-         this.$store.commit('ConfigureAnswers', number);
-
-      }
-    },
-
   created(){
 
       function getRandomInt(max) {
@@ -204,9 +184,7 @@ FilterConfig(answer, question) {
       this.users = lolarray;
         const users = this.users;
         const questions = this.questions;
-     // this.voegSamen();
-      this.oldData = this.users;
-
+         this.oldData = this.users;
         this.$store.commit('changeUsers', {users, questions});
         this.$store.commit('ConfigureAnswers');
     }
@@ -222,10 +200,8 @@ FilterConfig(answer, question) {
     float:right;
   }
   .menu {
-    position: fixed;
-    width:15%;
-
-
+      position: fixed;
+      width: 15%;
   }
   .app {
     background: white;

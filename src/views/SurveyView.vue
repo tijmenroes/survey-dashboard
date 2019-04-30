@@ -1,6 +1,6 @@
 <template>
     <div>
-        {{surveys}}
+
         <v-btn @click="fetchSurvey">{{$store.state.loading}}</v-btn>
         <v-container fluid >
             <v-layout wrap>
@@ -23,6 +23,9 @@
             </v-layout>
 
         </v-container>
+        {{questions}}
+        <hr>
+        {{answers}}
     </div>
 </template>
 
@@ -36,6 +39,8 @@
                 surveys: [],
                 errorText: '',
                 noError: true,
+                questions: [],
+                answers: [],
                 surveyHeaders: [{"text": "Id", "value": "id"},{"text": "Title", "value": "title"}, {"text": "Actie", "value": "arrow"}],
                 pagination: {
                     "descending": true,
@@ -69,7 +74,64 @@
                     this.noError = false
                 })
             }, logSurvey(id){
-                console.log(id);
+                this.$store.state.loading = true;
+                axios.get('https://survey-api.test.tc8l.nl/api/survey/questions/' + id)
+                    .then(response => {
+                    //    console.log(response.data.data.pages[0].questions);
+                        this.questions = response.data.data.pages[0].questions;
+                        //const resultArray = [];
+
+                        //this.questions = resultArray; //Link m aan de display
+                       this.$store.state.loading = false;
+                    }).catch(error => {
+
+                    error = error.toString();
+                    if(error.includes('code 500')){
+                        this.errorText = "Bestaat niet"
+                    }else if(error.includes('undefined')) {
+                        this.errorText = "Geen vragen/ niet goed opgesteld"
+                    } else {
+                        this.errorText = "Gewoon een error"
+                    }
+                    // this.errorText = error;
+                    this.noError = false
+                   // this.$store.state.loading = false;
+
+                });
+
+                axios.get('https://survey-api.test.tc8l.nl/api/survey/answers/' + id)
+                    .then(response => {
+                        //console.log(response.data.data);
+                      //  this.answers = response.data.data;
+                            const AnswerArray = [];
+                            for(let user in response.data.data) {
+                               AnswerArray.push(Object.values(response.data.data[user].answers));
+                            }
+
+                  //      this.$store.commit('changeUsers', {users, questions});
+                  //      this.$store.commit('ConfigureAnswers');
+
+                           this.answers = AnswerArray;
+
+                        //const resultArray = [];
+
+                        //this.questions = resultArray; //Link m aan de display
+                        this.$store.state.loading = false;
+                    }).catch(error => {
+
+                    error = error.toString();
+                    if(error.includes('code 500')){
+                        this.errorText = "Bestaat niet"
+                    }else if(error.includes('undefined')) {
+                        this.errorText = "Geen vragen/ niet goed opgesteld"
+                    } else {
+                        this.errorText = "Gewoon een error"
+                    }
+                    // this.errorText = error;
+                    this.noError = false
+                    // this.$store.state.loading = false;
+
+                });
             }
 
         }, created(){

@@ -7,6 +7,7 @@ Vue.use(Vuex);
 export const store = new Vuex.Store({
     state: {
         userAnswers: 12123213,
+
         users: [],
         filters: [],
         oldData: [],
