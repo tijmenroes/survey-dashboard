@@ -1,5 +1,6 @@
 <template>
     <div>
+
           <v-menu offset-y v-if="showMenu">
             <template v-slot:activator="{ on }">
                 <v-btn
@@ -13,7 +14,7 @@
             </template>
             <v-list>
                 <v-list-tile
-                        v-for="(item, index) in vragen"
+                        v-for="(item, index) in $store.state.questions"
                         :key="index"
                         @click="selectItem(index)"
                 >
@@ -22,9 +23,9 @@
             </v-list>
         </v-menu>
         <div v-else>
-            <div v-for="(keuzes, index) in vragen[filterStatus].questionChoices">
+            <div v-for="(keuzes, index) in $store.state.questions[filterStatus].questionChoices">
              <v-checkbox
-                :label="keuzes" :value="vragen[filterStatus].questionChoices[index]" v-model="haha[filterStatus].choices" color="#707171">
+                :label="keuzes" :value="$store.state.questions[filterStatus].questionChoices[index]" v-model="haha[filterStatus].choices" color="#707171">
              </v-checkbox>
             </div>
 

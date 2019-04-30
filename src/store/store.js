@@ -9,15 +9,12 @@ export const store = new Vuex.Store({
         userAnswers: 12123213,
         users: [],
         filters: [],
-        counter: 419,
         oldData: [],
         questions: [],
         configured: [],
         loading: false,
     }, mutations: {
         changeUsers(state, {users, questions}){
-            console.log(users);
-            console.log(questions);
             state.userAnswers  = users;
             state.oldData = users;
             state.users = users;
@@ -25,8 +22,7 @@ export const store = new Vuex.Store({
         },
         addFilter(state, {answer, question}) {
             const array = [];
-            console.log(answer + ' lolz' + question);
-            console.log(state.userAnswers);
+
             for (let key in state.userAnswers) {
                 for (let aantal in answer) {
                     if (state.userAnswers[key].answers[question] === answer[aantal]) {
@@ -38,7 +34,7 @@ export const store = new Vuex.Store({
             state.filters.push({'Question': question, 'Answer': answer, 'Code': [{'q': question, 'a': answer}]});
             state.userAnswers = array;
             console.log(state.userAnswers);
-            state.commit('configureAnswers');
+
 
         },delFilter(state, number){
 
@@ -91,6 +87,7 @@ export const store = new Vuex.Store({
 
                const answerArray = [];
                const vraagArray = [];
+
                for (let user in state.userAnswers) {
 
                     answerArray.push(state.userAnswers[user].answers[key])
@@ -107,16 +104,18 @@ export const store = new Vuex.Store({
                //      lit.push('questionAnswers', vraagArray);
                //      console.log(lit);
                // // state.$set(state.questions[key], 'questionAnswers', vraagArray)
-                state.questions[key].questionAnswers.push(vraagArray);
+                //state.questions[key].questionAnswers.push(vraagArray);
+
             }
 
-            state.configured = state.questions;
+            state.configured = dataArray;
         }
 
     }, getters : {
        //getState: state => state.counter
+        getData: state => () => state.configured,
+        getFilters: state => () => state.filters,
     }, actions : {
-
 
 
     }

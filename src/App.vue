@@ -3,20 +3,14 @@
     <v-content>
       <div class="pageButtons">
       <span v-for="(button,index) in buttons"> <v-btn class="Vuebutton text-none" @click="pageNumber = index" flat depressed>{{button}}</v-btn> </span>
-
       </div>
-      <v-btn @click="vuexCommit">Vuex commit</v-btn>
-        <v-btn @click="FilterVuex">Add filter via vuex</v-btn>
+
       {{pageNumber}}<br>
-      {{ $store.state.userAnswers }}
-        <hr>
-        {{ $store.state.filters }}
-        <hr>
-        {{ $store.state.configured }}
+
 <v-layout>
           <v-flex md10 sm12 ref="printMe">
       <keep-alive>
-      <Overview v-if="pageNumber === 2" :questions="poep" ref="overview"></Overview>
+      <Overview v-if="pageNumber === 2"  ref="overview"></Overview>
       <Individual v-else-if="pageNumber === 1" :users="users" :questions="questions"></Individual>
 
         <div v-else>
@@ -45,8 +39,9 @@
             <!--<export-component :toPrint="$refs" :vragen="vragen"></export-component>-->
             <DataFilter :vragen="questions" @addFilter="FilterConfig"></DataFilter>
             <div>
+
               <v-btn flat class="text-none"
-                     v-for="(filter,index)  in filters" :key="index" @click="delFilter(index)">
+                     v-for="(filter,index)  in $store.state.filters" :key="index" @click="delFilter(index)">
                 Q {{filter.Question}}: {{filter.Answer.toString()}}  <v-icon right small> close</v-icon></v-btn>
             </div>
             </v-container>
@@ -72,26 +67,10 @@ export default {
     Individual: () => import('./views/Individual.vue'),
     DataFilter, ExportComponent
   },
-  watch: {
-    users(){
-      this.voegSamen();
-    },
-    poep(){
-      this.changeData();
-    },
-      userAnswers(){
-        console.log('wow');
-      }
-  },
-  computed: {
 
-    // counter(){
-    //   return store.$state.counter
-    // }
-  },
   data () {
     return {
-      pageNumber: 0,
+      pageNumber: 2,
       oldData: [],
       filters: [],
      users: [],
@@ -119,69 +98,20 @@ export default {
     }
   },
   methods: {
-      vuexCommit(){
-      //  this.$store.commit('changeUsers', this.users);
-      },
-      FilterVuex(){
-          console.log('vuexdone');
-          let actie = ["Actie"];
-         // this.$store.commit('addFilter', 0, actie)
-      },
-    changeData(){
-      this.$refs.overview.drawCharts();
-    },
-      voegSamen() {
-        this.poep = [];
-      const dataArray = [];
-
-      for(let key in this.questions) {
-
-        const answerArray = [];
-        const vraagArray =[];
-        for(let user in this.users) {
-
-          answerArray.push(this.users[user].answers[key])
-        }
-        for(let vraag in this.questions[key].questionChoices){
-          const get = this.countInArray(answerArray,this.questions[key].questionChoices[vraag]);
-          vraagArray.push(get);
-        }
-        dataArray.push({"Title": this.questions[key].questionTitle,"questionChoices": this.questions[key].questionChoices, questionAnswers: vraagArray});
-
-        this.$set(this.questions[key], 'questionAnswers', vraagArray)
-      }
-      //  console.log(this.questions);
-        this.poep = this.questions;
-     },
-    countInArray(array, what) {
-      var count = 0;
-      let tempArray = {};
-      for (var i = 0; i < array.length; i++) {
-        if (array[i] === what) {
-          count++;
-        }
-      }
-      if(count > 0 ) {
-        tempArray = {"name": what, "value": count};
-      } else {
-       tempArray = {"name": what, "value": null, "label": {"show": false}};
-      }
-      return tempArray;
-
-
-    },  FilterConfig(answer, question) {
+FilterConfig(answer, question) {
       const filterExists = this.filterExists(answer, question);
-      console.log(answer + 'dit is de app: ' + question);
       if (answer.length === 0) {
         alert('Selecteer een filter!');
       } else {
         if (filterExists === false) {
-          this.addFilter(answer, question);
+        //  this.addFilter(answer, question);
           this.$store.commit('addFilter', {answer, question});
-          console.log("hoi");
+          this.$store.commit('ConfigureAnswers');
+          console.log("Filter send to vuex");
         } else if (filterExists === "bestaat") {
-          this.delFilter(question);
-          this.addFilter(answer, question);
+            this.delFilter(question);
+            this.$store.commit('addFilter', {answer, question});
+            this.$store.commit('ConfigureAnswers');
         } else {
           alert('Die filter bestaat al!');
         }
@@ -199,49 +129,14 @@ export default {
         }
       }
     },
-    addFilter(answer, question) {
+     delFilter(number){
+         this.$store.commit('delFilter', number);
+         this.$store.commit('ConfigureAnswers', number);
 
-      const array = [];
-      for (let key in this.users) {
-        for (let aantal in answer) {
-          if (this.users[key].answers[question] === answer[aantal]) {
-            array.push(this.users[key])
-          }
-        }
-      }
-      //Push in filters array
-      this.filters.push({'Question': question, 'Answer': answer, 'Code': [{'q': question, 'a': answer}]});
-      this.users = array;
-    },
-    delFilter(number){
-          this.$store.commit('delFilter', number);
-      this.filters.splice(number ,1);
-      this.users = this.oldData;
-      const array = [];
-
-      if(this.filters.length > 0) {
-        console.log('MEER DAN 0');
-        for (let filter in this.filters) {
-          const question = this.filters[filter].Code[0].q;
-          const answer = this.filters[filter].Code[0].a;
-        //  console.log(answer);
-          for (let key in this.users) {
-            for (let aantal in answer) {
-              //console.log('q =' + this.users[key].answers[question]  + ' : A =' + answer[aantal]);
-              if (this.users[key].answers[question] ===answer[aantal]) {
-                console.log('matching!');
-                array.push(this.users[key])
-              }
-            }
-          }
-        }
-      //  console.log(array);
-
-        this.users = array;
       }
     },
 
-  },  created(){
+  created(){
 
       function getRandomInt(max) {
         return Math.floor(Math.random() * Math.floor(max));
@@ -309,9 +204,9 @@ export default {
       this.users = lolarray;
         const users = this.users;
         const questions = this.questions;
-      this.voegSamen();
+     // this.voegSamen();
       this.oldData = this.users;
-        console.log(users);
+
         this.$store.commit('changeUsers', {users, questions});
         this.$store.commit('ConfigureAnswers');
     }

@@ -2,6 +2,8 @@
     <div>
     <!--<DrawChart  :vragen="questions" :data="data" ></DrawChart>-->
         <div>
+
+
              <v-container grid-list-xs>
                 <hr>
                 <v-layout row wrap ref="printMe" style="background-color: white">
@@ -13,7 +15,9 @@
                         >
                             <v-expansion-panel-content>
                                 <template v-slot:header>
-                                    <div class="text-truncate" >Q{{i + 1}}. {{questions[i].questionTitle}}</div>
+                                    <div class="text-truncate" >
+                                        Q{{i + 1}}. {{reactiveData[i].Title}}
+                                    </div>
                                 </template>
                                 <div class="cardContent" v-if="chart.zerovalues === false">
                                     <!--<v-btn small rounded depressed class="text-none" @click="chart.menuShow =! chart.menuShow" color="#475A64"  dark v-if="!chart.menuShow">Aanpassen</v-btn>-->
@@ -27,7 +31,7 @@
                                                     <span v-else-if="chart.menuNumber !== index"> {{button}}
                                                         <v-icon small >keyboard_arrow_up</v-icon></span>
                                                 </v-btn>
-                                            </span>
+                                    </span>
 
                                     <div class="uitschuifDiv">
                                         <v-expand-transition>
@@ -97,11 +101,17 @@
 
 
     export default {
-        props:['questions'],
+
         name: 'Overview',
         components: {
-          //  DrawChart
+
             'v-chart': ECharts,
+        },
+        mounted(){
+          this.$store.watch(this.$store.getters.getData, configured => {
+              this.reactiveData = configured;
+              this.drawCharts();
+          })
         },
         data() {
             return  {
@@ -123,8 +133,11 @@
                 reactiveData: this.$store.state.configured
 
             }
+        },
+        computed:{
+
         },watch :{
-            displayOptions(){
+            configured(){
               console.log('wowzers')
           }
         }, methods: {
@@ -186,10 +199,8 @@
             },
 
                 drawCharts(){
-                console.log('lolz');
                 for(let chart in this.pieArray.charts){
-                    this.pieArray.charts[chart].series[0].data =    this.reactiveData[chart].questionAnswers
-
+                    this.pieArray.charts[chart].series[0].data = this.reactiveData[chart].questionAnswers
                 }
             },
 
@@ -203,12 +214,10 @@
             for (let key in this.reactiveData) {
                 var allowed = 0;
                 for( let optie in this.reactiveData[key].questionAnswers){
-                    // const keyName =  Object.values(this.reactiveData[key].questionAnswers[optie][1]);
-                    // console.log(keyName);
+
                     if(this.reactiveData[key].questionAnswers[optie].value != null) {
                         allowed++
                     }
-
                 }
                 if(allowed > 0) {
                     this.pieArray.charts.push({
