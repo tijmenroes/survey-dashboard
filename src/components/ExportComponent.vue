@@ -4,9 +4,11 @@
         <v-menu offset-y>
             <template v-slot:activator="{ on }">
                 <v-btn
-                        color="#707171"
+                        color="#38C1A7"
                         dark
                         round
+
+                        class="menuButton text-none"
                         v-on="on"
                         :loading="loading"
                 >
@@ -164,3 +166,5 @@
         }
     }
 </script>
+
+

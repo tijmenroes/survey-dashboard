@@ -1,11 +1,10 @@
 <template>
     <div>
-
     <!--<DrawChart  :vragen="questions" :data="data" ></DrawChart>-->
         <div>
              <v-container grid-list-xs>
                 <hr>
-                <v-layout row wrap ref="printMe" style="background-color: #fafafa">
+                <v-layout row wrap ref="printMe" style="background-color: white">
                     <v-flex xs12  md6 :lg8="chart.bigDiv" :lg4="!chart.bigDiv" pa-3  v-for="(chart,i) in pieArray.charts" :key="i">
                         <v-expansion-panel
                                 v-model="panel[i]"
@@ -17,34 +16,52 @@
                                     <div class="text-truncate" >Q{{i + 1}}. {{questions[i].questionTitle}}</div>
                                 </template>
                                 <div class="cardContent" v-if="chart.zerovalues === false">
-                                    <v-btn small rounded depressed class="text-none" @click="chart.menuShow =! chart.menuShow" color="#475A64"  dark>Aanpassen</v-btn>
+                                    <!--<v-btn small rounded depressed class="text-none" @click="chart.menuShow =! chart.menuShow" color="#475A64"  dark v-if="!chart.menuShow">Aanpassen</v-btn>-->
 
                                     <div>
-                                    <span v-for="(button,index) in buttons" v-show="chart.menuShow">
-
-                                                <v-btn @click="chart.menuNumber = index" flat depressed>{{button}}</v-btn>
+                                    <span v-for="(button,index) in buttons" >
+                                                <v-btn @click="chart.menuNumber = index" flat depressed>
+                                                    <span v-if="chart.menuNumber === index" @click="chart.menuShow =! chart.menuShow " style="color:red">
+                                                    {{button}}
+                                                     <v-icon small >keyboard_arrow_down</v-icon></span>
+                                                    <span v-else-if="chart.menuNumber !== index"> {{button}}
+                                                        <v-icon small >keyboard_arrow_up</v-icon></span>
+                                                </v-btn>
                                             </span>
+
                                     <div class="uitschuifDiv">
                                         <v-expand-transition>
                                             <div v-show="chart.menuShow">
                                                     <div v-if="chart.menuNumber === 0">
                                                         <v-layout row wrap>
                                                         <v-flex v-for="(option, optionIndex) in options" xs3 md4 lg2 >
-                                                            <v-btn fab flat @click="toLine(i, optionIndex)">
-                                                                <v-icon v-if="chart.chartType === optionIndex" color="red">{{option.icon}}</v-icon>
+                                                            <v-tooltip bottom>
+                                                                <template v-slot:activator="{ on }">
+                                                            <v-btn fab flat v-on="on" @click="toLine(i, optionIndex)">
+                                                                <v-icon  v-if="chart.chartType === optionIndex" color="red">{{option.icon}}</v-icon>
                                                                 <v-icon v-else color="#707171">{{option.icon}}</v-icon>
                                                             </v-btn>
+                                                                </template>
+                                                                <span>{{option.text}}</span>
+                                                            </v-tooltip>
                                                         </v-flex>
                                                         </v-layout>
 
-                                                        <v-btn color="#BDC3C6" class="text-none">Discard</v-btn>
-                                                        <v-btn color="#475A64" class="text-none" dark @click="chart.menuShow =! chart.menuShow">Save</v-btn>
+                                                        <v-btn color="#475A64" small class="text-none" dark @click="chart.menuShow =! chart.menuShow">Ga Terug</v-btn>
                                                     </div>
+                                                <div v-else>
 
-                                                <v-layout row wrap v-else>
-                                                    <v-btn @click="changeFormat(i)">Geen Cijfers</v-btn>
-                                           
-                                                </v-layout>
+                                                    <v-layout row wrap >
+                                                        <v-radio-group v-model="chart.radioGroup" @change="displayHandler(chart.radioGroup, i)">
+                                                            <v-radio  :value="0" label="Geen Cijfers"></v-radio>
+                                                            <v-radio  :value="1"  label="Absolute Cijfers"></v-radio>
+                                                            <v-radio v-if="chart.chartType > 2"  :value="2" label="Percentage"></v-radio>
+                                                        </v-radio-group>
+
+                                                    </v-layout>
+                                                    <v-btn color="#475A64" small class="text-none" dark @click="chart.menuShow =! chart.menuShow">Ga Terug</v-btn>
+                                                </div>
+
                                             </div>
                                         </v-expand-transition>
                                     </div>
@@ -88,7 +105,8 @@
         },
         data() {
             return  {
-                options: [{"icon": "show_chart"}, {"icon": "bar_chart"}, {"icon": "pie_chart"},{"icon": "donut_large"}],
+                options: [{"icon": "show_chart", "text": "Lijngrafiek"}, {"icon": "bar_chart","text": "Staafgrafiek"}, {"icon": "bar_chart", "text": "Horizontale staafgrafiek"},{"icon": "donut_large", "text": "Donutgrafiek"},{"icon": "pie_chart", "text": "Taartgrafiek"}],
+                radioGroup: 1,
                 displayOptions: [{"Radiobuttons": [
                     {"text": "percentages", "value": true},
                     {"text":"cijfers", "value": false},
@@ -102,7 +120,7 @@
                 panel: [],
                 qData: [],
                 menuNumber: 0,
-                reactiveData: this.questions
+                reactiveData: this.$store.state.configured
 
             }
         },watch :{
@@ -110,140 +128,134 @@
               console.log('wowzers')
           }
         }, methods: {
-            changeFormat(index){
-                this.pieArray.charts[index].series[0].label.show = false
+            displayHandler(nummer, index){
+                if(nummer === 0) {
+                    this.pieArray.charts[index].series[0].label.show = false;
+                } else if(nummer === 1){
+                    this.pieArray.charts[index].series[0].label.show = true;
+                    this.pieArray.charts[index].series[0].label.formatter = '{c}'
+                } else if (nummer === 2){
+                    this.pieArray.charts[index].series[0].label.show = true;
+                    this.pieArray.charts[index].series[0].label.formatter = '{d}%'
+                }
             },
+
             toLine(graph  , option){
 
-                var graphConfig = this.graphToLine(graph);
-                graphConfig.chartType = option;
+                const grafiek = this.pieArray.charts[graph];
+                //Reset Graph
+
+                grafiek.chartType = option;
+                grafiek.yAxis.show = true;
+                grafiek.xAxis.show = true;
+                grafiek.xAxis.type = 'category';
+                grafiek.yAxis.type = 'value';
+
+                if(grafiek.series[0].label.formatter === "{d}%" && option < 3) {
+                    grafiek.series[0].label.show = false;
+                } else if(grafiek.series[0].label.formatter === "{d}%" && option > 2) {
+                    grafiek.series[0].label.show = true;
+                }
 
                 if(option === 0){
-                    graphConfig.series[0].type = 'line';
-                    graphConfig.yAxis.show = true;
-                    this.pieArray.charts.splice(graph, 1, graphConfig )
+                    grafiek.series[0].type = 'line';
+                    grafiek.yAxis.show = true;
+
                 } else if(option === 1) {
-                    graphConfig.yAxis.show = true;
-                    graphConfig.xAxis.show = true;
-                   graphConfig.series[0].type = 'bar';
-                    this.pieArray.charts.splice(graph, 1, graphConfig )
+                    grafiek.yAxis.show = true;
+                    grafiek.xAxis.show = true;
+                    grafiek.series[0].type = 'bar';
                 } else if (option === 2){
-                    graphConfig.series[0].type = 'pie';
-                    this.pieArray.charts.splice(graph, 1, graphConfig )
+                    grafiek.yAxis.show = true;
+                    grafiek.xAxis.show = true;
+                    grafiek.series[0].type = 'bar';
+                    grafiek.yAxis.type = 'category';
+                    grafiek.xAxis.type = 'value';
+
                 }else if (option === 3){
-                    graphConfig.series[0].type = 'pie';
-                    graphConfig.series[0].radius = ['45%', '75%'];
-                    this.pieArray.charts.splice(graph, 1, graphConfig )
+                    grafiek.series[0].type = 'pie';
+                    grafiek.series[0].radius = ['45%', '75%'];
+                    grafiek.yAxis.show = false;
+                    grafiek.xAxis.show = false;
+                }else if (option === 4){
+                    grafiek.series[0].type = 'pie';
+                    grafiek.series[0].radius = ['0%', '75%'];
+                    grafiek.yAxis.show = false;
+                    grafiek.xAxis.show = false;
                 }
-                this.pieArray.charts[graph].chartType = option
             },
-            graphToLine(graphNumber){
-                var graph = {
-                    bigDiv: false,
-                    menuShow: true,
-                    zerovalues: false,
-                    menuNumber: 0,
-                    chartType: 3,
-                    legend: {},
-                    tooltip: {},
-                    xAxis: {
-                        show: false,
-                        data: this.reactiveData[graphNumber].questionChoices
-                    },
-                    yAxis: {
-                        show: false
-                    },
-                    series: [{
 
-                        color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
-                        data: this.reactiveData[graphNumber].questionAnswers,
-                        itemStyle: {
-                            borderColor: 'white',
-                            borderWidth: 2.3,
-                        },
-                        label: {
-
-                            formatter: '{d}%',
-                            position: 'inner'
-                        },
-                        // color: "#3a84dd",
-                        smooth: true,
-                        symbolSize: 6,
-                        lineStyle: {
-                            width: 3.5
-                        },
-                        areaStyle: {
-                            opacity: 0.4
-                        },
-
-                    }]
-                };
-                return graph
-            },
                 drawCharts(){
-                this.pieArray = {
-                        charts: []
-                };
+                console.log('lolz');
+                for(let chart in this.pieArray.charts){
+                    this.pieArray.charts[chart].series[0].data =    this.reactiveData[chart].questionAnswers
 
-                for (let key in this.reactiveData) {
-                    var allowed = 0;
-                    for( let optie in this.reactiveData[key].questionAnswers){
-                      // const keyName =  Object.values(this.reactiveData[key].questionAnswers[optie][1]);
-                      // console.log(keyName);
-                     if(this.reactiveData[key].questionAnswers[optie].value != null) {
-                         allowed++
-                     }
-
-                    }
-                    if(allowed > 0) {
-                        this.pieArray.charts.push({
-                            bigDiv: false,
-                            zerovalues: false,
-                            menuShow: true,
-                            menuNumber: 1,
-                            chartType: 3,
-                            legend: {},
-                            tooltip: {},
-                            xAxis: {
-                                show: false,
-                                data: this.reactiveData[key].questionChoices
-                            },
-                            yAxis: {show: false},
-                            series: [{
-                                type: 'pie',
-                                radius: ['45%', '75%'],
-                                color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
-                                data: this.reactiveData[key].questionAnswers,
-                                itemStyle: {
-                                    borderColor: 'white',
-                                    borderWidth: 2.3,
-                                },
-                                label: {
-                                    show: true,
-                                    formatter: '{d}%',
-                                    position: 'inner'
-                                },
-                                // color: "#3a84dd",
-                                smooth: true,
-                                symbolSize: 6,
-                                lineStyle: {
-                                    width: 3.5
-                                },
-                                areaStyle: {
-                                    opacity: 0.4
-                                },
-
-                            }]
-                        })
-                    } else {
-                        console.log('zero values fam');
-                        this.pieArray.charts.push({zerovalues: true})
-                    }
                 }
-            }
+            },
+
         },
         created() {
-            this.drawCharts();
+           // this.drawCharts();
+            this.pieArray = {
+                charts: []
+            };
+
+            for (let key in this.reactiveData) {
+                var allowed = 0;
+                for( let optie in this.reactiveData[key].questionAnswers){
+                    // const keyName =  Object.values(this.reactiveData[key].questionAnswers[optie][1]);
+                    // console.log(keyName);
+                    if(this.reactiveData[key].questionAnswers[optie].value != null) {
+                        allowed++
+                    }
+
+                }
+                if(allowed > 0) {
+                    this.pieArray.charts.push({
+                        bigDiv: false,
+                        zerovalues: false,
+                        menuShow: true,
+                        menuNumber: 1,
+                        radioGroup: 2,
+                        chartType: 3,
+                        legend: {},
+                        tooltip: {},
+                        xAxis: {
+                            show: false,
+                            data: this.reactiveData[key].questionChoices
+                        },
+                        yAxis: {show: false},
+                        series: [{
+                            type: 'pie',
+                            radius: ['45%', '75%'],
+                            color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
+                            data: this.reactiveData[key].questionAnswers,
+                            itemStyle: {
+                                borderColor: 'white',
+                                borderWidth: 2.3,
+                            },
+                            label: {
+                                show: true,
+                                formatter: '{d}%',
+                                position: 'inside'
+                            },
+                            // color: "#3a84dd",
+                            smooth: true,
+                            symbolSize: 6,
+                            lineStyle: {
+                                width: 3.5
+                            },
+                            areaStyle: {
+                                opacity: 0.4
+                            },
+
+                        }]
+                    })
+                } else {
+                    console.log('zero values fam');
+                    this.pieArray.charts.push({zerovalues: true})
+                }
+            }
             const tempPanel = [];
             for (let key in this.pieArray.charts) {
                 tempPanel.push(0)

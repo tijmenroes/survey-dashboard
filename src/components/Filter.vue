@@ -3,11 +3,12 @@
           <v-menu offset-y v-if="showMenu">
             <template v-slot:activator="{ on }">
                 <v-btn
-                        color="primary"
+                        color="#475963"
                         dark
-                        v-on="on"
+                        v-on="on" round
+                        class="menuButton text-none"
                 >
-                    Choose Question <v-icon right>arrow_drop_down</v-icon>
+                    Add Filter <v-icon right>arrow_drop_down</v-icon>
                 </v-btn>
             </template>
             <v-list>
@@ -70,6 +71,8 @@
     }
 </script>
 
-<style scoped>
-
+<style >
+.menuButton{
+    width: 100%;
+}
 </style>

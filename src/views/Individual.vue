@@ -1,5 +1,7 @@
 <template>
     <div>
+
+        {{users}}
         <v-container fluid grid-list-xs>
             <v-layout wrap>
                 <v-flex xs10 class="pa-3">
@@ -77,6 +79,11 @@
 <script>
     export default {
         name: 'Individual',
+        props: ['users', 'questions'],
+        created() {
+            this.configureHeaders();
+            this.configureRows();
+        },
         data() {
             return {
                 dialog: false,
@@ -84,6 +91,7 @@
                 pagination: {
                     sortBy: 'name'
                 },
+                reactiveUsers: this.users,
                 search: '',
                 selected: [],
                 lol: [{"name": "13-06-2019 16:06:32"}, {"q1": "Niet normaal hoe tevreden ik ben echt niet normaal het is gewoon echt abnormaal ik ben zo tevreden"}, {
@@ -94,38 +102,44 @@
                     "q6": "Niet normaal hoe tevreden ik ben echt niet normaal "
                 }],
                 headers: [
-                    {text: 'Date time', value: 'name'},
-                    {text: 'Q1.', value: "Q1. Bent u tevreden over uw laatste bezoek?"},
+                    // {text: 'Date time', value: 'name'},
+                    {text: 'Q0.', value: "q0"},
+                    {text: 'Q1.', value: "q1"},
                     {text: 'Q2. Bent u tevreden over uw laatste bezoek?', value: 'q2'},
                     {text: 'Q3. Bent u tevreden over uw laatste bezoek?', value: 'q3'},
-                    {text: 'Q4. Bent u tevreden over uw laatste bezoek?', value: 'q4'},
-                    {text: 'Q5. Bent u tevreden over uw laatste bezoek?', value: 'q5'},
-                    {text: 'Q6. Bent u tevreden over uw laatste bezoek?', value: 'q6'}
+
                 ],
-                desserts: [
-                    {
-                        name: '13-06-2019 16:06:32',
-                        "Q1. Bent u tevreden over uw laatste bezoek?": "ik ben zo tevreden",
-                        q2: 0,
-                        q3: "De stoelen zaten erg oncomfortabel",
-                        q4: "Tevreden",
-                        q5: 3,
-                        q6: 11,
-                    }, {
-                        name: '13-04-2012 16:06:32',
-                        "Q1. Bent u tevreden over uw laatste bezoek?": "Ik ben heel tevreden",
-                        q2: 2,
-                        q3: "De stoelen zaten erg oncomfortabel",
-                        q4: "Tevreden",
-                        q5: 14,
-                        q6: 12,
-                    },
-                ]
+                desserts: []
             }
         }, methods: {
-            openDialog(info){
-                this.dialog =!this.dialog;
+            openDialog(info) {
+                this.dialog = !this.dialog;
                 this.dialogText = info;
+            },
+            configureHeaders() {
+                let headerArray = [];
+                for (let question in this.questions) {
+                    var text = 'Q' + question.toString() + '. ' + this.questions[question].questionTitle;
+                    var number = 'q' + question.toString();
+                    headerArray.push({text: text, value: number})
+                }
+                this.headers = headerArray;
+            }, configureRows(){
+                this.desserts = [];
+                for (let user in this.users) {
+                    let userArray = {'answers': {}};
+                    for (let answer  in this.users[user].answers) {
+
+                        var antwoord = 'q' + answer.toString();
+
+                        // userArray.answers.push([antwoord]: this.users[user].answers[answer])
+                        userArray.answers[antwoord] = this.users[user].answers[answer]
+
+                    }
+                   // this.desserts = [];
+                    this.desserts.push(userArray.answers);
+                }
+                // console.log(userArray)
             },
             jsonConvert() {
 
@@ -205,11 +219,11 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-            }, created() {
-                //console.log(Object.keys(this.lol[0]));
-                const lit = Object.values(this.lol[0]);
-                console.log(lit.toString()) //KIJK OF DIT KAN CUZ IDKDKDFDKJKLS
-            }
+            },
+        }, watch: {
+            // users() {
+            //   //  this.configureRows();
+            // },
         }
     }
 </script>

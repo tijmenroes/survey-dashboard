@@ -1,38 +1,47 @@
 <template>
-  <v-app>
-
+  <v-app class="app">
     <v-content>
-
       <div class="pageButtons">
-
-      <span v-for="(button,index) in buttons"> <v-btn class="button" @click="pageNumber = index" flat depressed>{{button}}</v-btn> </span>
-        <!--<hr>-->
+      <span v-for="(button,index) in buttons"> <v-btn class="Vuebutton text-none" @click="pageNumber = index" flat depressed>{{button}}</v-btn> </span>
 
       </div>
-      <v-btn @click="changeData"></v-btn>
+      <v-btn @click="vuexCommit">Vuex commit</v-btn>
+        <v-btn @click="FilterVuex">Add filter via vuex</v-btn>
       {{pageNumber}}<br>
-
-        <v-layout>
-
-          <v-flex xs10 ref="printMe">
+      {{ $store.state.userAnswers }}
+        <hr>
+        {{ $store.state.filters }}
+        <hr>
+        {{ $store.state.configured }}
+<v-layout>
+          <v-flex md10 sm12 ref="printMe">
       <keep-alive>
       <Overview v-if="pageNumber === 2" :questions="poep" ref="overview"></Overview>
-      <Individual v-else-if="pageNumber === 1"></Individual>
+      <Individual v-else-if="pageNumber === 1" :users="users" :questions="questions"></Individual>
 
-        <div v-else> haha</div>
+        <div v-else>
+        <SurveyView></SurveyView>
+        </div>
       </keep-alive>
           </v-flex>
-          <v-flex xs2>
-            <v-card class="menu">
+          <v-flex md2 sm12 v-if="pageNumber === 2">
 
-            <v-card-title primary-title>
+            <v-card class="menu" >
+            <v-container>
+
               <div class="headline">Product survey</div>
-            </v-card-title>
-            <span class="grey--text">Made on: 13-06-2018</span> <br>
-            <span class="grey--text">Last seen: 20-06-2018</span>
 
-            <v-divider></v-divider>
-            <ExportComponent :toPrint="$refs"></ExportComponent>
+              <v-divider class="pa-1"></v-divider>
+
+            <span class="grey--text">Made on: 13-06-2018</span> <br>
+            <span class="grey--text">Last seen: 20-06-2018</span> <br>
+              <span class="grey--text">Status: Open </span>
+
+            <v-divider class="pa-1"></v-divider>
+              <v-btn dark round class="menuButton text-none" color="#475963"> Herstel pagina</v-btn>
+            <ExportComponent :toPrint="$refs" ></ExportComponent>
+              <div class="headline">Filters</div>
+              <v-divider></v-divider>
             <!--<export-component :toPrint="$refs" :vragen="vragen"></export-component>-->
             <DataFilter :vragen="questions" @addFilter="FilterConfig"></DataFilter>
             <div>
@@ -40,9 +49,10 @@
                      v-for="(filter,index)  in filters" :key="index" @click="delFilter(index)">
                 Q {{filter.Question}}: {{filter.Answer.toString()}}  <v-icon right small> close</v-icon></v-btn>
             </div>
-          </v-card></v-flex>
-        </v-layout>
-
+            </v-container>
+          </v-card>
+            </v-flex>
+</v-layout>
     </v-content>
   </v-app>
 </template>
@@ -50,6 +60,7 @@
 <script>
 
 import Overview from "./views/Overview.vue";
+import SurveyView from "./views/SurveyView.vue";
 // import Individual from './views/Individual.vue'
 import DataFilter from './components/Filter.vue'
 import ExportComponent from './components/ExportComponent.vue'
@@ -57,7 +68,7 @@ export default {
   name: 'App',
   props: ['source'],
   components: {
-    Overview,
+    Overview, SurveyView,
     Individual: () => import('./views/Individual.vue'),
     DataFilter, ExportComponent
   },
@@ -67,18 +78,25 @@ export default {
     },
     poep(){
       this.changeData();
-    }
+    },
+      userAnswers(){
+        console.log('wow');
+      }
   },
+  computed: {
 
+    // counter(){
+    //   return store.$state.counter
+    // }
+  },
   data () {
     return {
-      pageNumber: 2,
+      pageNumber: 0,
       oldData: [],
       filters: [],
      users: [],
       poep:  {'answers': []},
       lol: [],
-
       supertof: null,
       data: [],
       questions:[{
@@ -101,8 +119,15 @@ export default {
     }
   },
   methods: {
+      vuexCommit(){
+      //  this.$store.commit('changeUsers', this.users);
+      },
+      FilterVuex(){
+          console.log('vuexdone');
+          let actie = ["Actie"];
+         // this.$store.commit('addFilter', 0, actie)
+      },
     changeData(){
-
       this.$refs.overview.drawCharts();
     },
       voegSamen() {
@@ -144,15 +169,22 @@ export default {
       return tempArray;
 
 
-    },  FilterConfig(answer, question){
+    },  FilterConfig(answer, question) {
       const filterExists = this.filterExists(answer, question);
-      if(filterExists === false) {
-        this.addFilter(answer, question);
-      } else if (filterExists === "bestaat") {
-        this.delFilter(question);
-        this.addFilter(answer, question);
+      console.log(answer + 'dit is de app: ' + question);
+      if (answer.length === 0) {
+        alert('Selecteer een filter!');
       } else {
-        alert('Die filter bestaat al!');
+        if (filterExists === false) {
+          this.addFilter(answer, question);
+          this.$store.commit('addFilter', {answer, question});
+          console.log("hoi");
+        } else if (filterExists === "bestaat") {
+          this.delFilter(question);
+          this.addFilter(answer, question);
+        } else {
+          alert('Die filter bestaat al!');
+        }
       }
     },
     filterExists(answer, question){
@@ -168,6 +200,7 @@ export default {
       }
     },
     addFilter(answer, question) {
+
       const array = [];
       for (let key in this.users) {
         for (let aantal in answer) {
@@ -181,7 +214,7 @@ export default {
       this.users = array;
     },
     delFilter(number){
-
+          this.$store.commit('delFilter', number);
       this.filters.splice(number ,1);
       this.users = this.oldData;
       const array = [];
@@ -274,8 +307,13 @@ export default {
         }
       }
       this.users = lolarray;
+        const users = this.users;
+        const questions = this.questions;
       this.voegSamen();
       this.oldData = this.users;
+        console.log(users);
+        this.$store.commit('changeUsers', {users, questions});
+        this.$store.commit('ConfigureAnswers');
     }
 }
 </script>
@@ -285,10 +323,21 @@ export default {
     width: 100%;
     float: right;
   }
-  .button {
+  .Vuebutton {
     float:right;
   }
   .menu {
     position: fixed;
+    width:15%;
+
+
+  }
+  .app {
+    background: white;
+  }
+  .headline{
+    color: #40475f;
+    text-transform: uppercase;
+    font-size: 14px !important;
   }
 </style>
