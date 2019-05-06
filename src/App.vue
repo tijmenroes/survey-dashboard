@@ -1,7 +1,7 @@
 <template>
   <v-app class="app">
     <v-content>
-        {{$store.state.loading}}
+
         <v-dialog
                 v-model="$store.state.loading"
 
@@ -26,42 +26,28 @@
       <div class="pageButtons">
       <span v-for="(button,index) in buttons"> <v-btn class="Vuebutton text-none" @click="pageNumber = index" flat depressed>{{button}}</v-btn> </span>
       </div>
-
-      {{pageNumber}}<br>
+<div style="width:100%;">x</div>
+<p style="opacity:0">x</p>
 
 <v-layout>
-          <v-flex md10 sm12 ref="printMe">
+
       <keep-alive>
-      <Overview v-if="pageNumber === 2"  ref="overview"></Overview>
-      <Individual v-else-if="pageNumber === 1" :users="users" :questions="questions"></Individual>
+          <v-flex md10 sm12 ref="printMe" v-if="pageNumber === 2">
+      <Overview ref="overview"></Overview>
+          </v-flex>
+      <Individual v-else-if="pageNumber === 1"></Individual>
 
         <div v-else>
         <SurveyView></SurveyView>
         </div>
       </keep-alive>
-          </v-flex>
+
           <v-flex md2 sm12 v-if="pageNumber === 2">
 
-            <v-card class="menu" >
-            <v-container>
+            <v-card class="menu">
 
-              <div class="headline">Product survey</div>
+                <MenuComponent :toPrint="$refs"></MenuComponent>
 
-              <v-divider class="pa-1"></v-divider>
-
-            <span class="grey--text">Made on: 13-06-2018</span> <br>
-            <span class="grey--text">Last seen: 20-06-2018</span> <br>
-              <span class="grey--text">Status: Open </span>
-
-            <v-divider class="pa-1"></v-divider>
-              <v-btn dark round class="menuButton text-none" color="#475963"> Herstel pagina</v-btn>
-            <ExportComponent :toPrint="$refs"></ExportComponent>
-              <div class="headline">Filters</div>
-              <v-divider></v-divider>
-            <!--<export-component :toPrint="$refs" :vragen="vragen"></export-component>-->
-            <DataFilter></DataFilter>
-
-            </v-container>
           </v-card>
             </v-flex>
 </v-layout>
@@ -73,17 +59,18 @@
 
 import Overview from "./views/Overview.vue";
 import SurveyView from "./views/SurveyView.vue";
+import MenuComponent from './components/MenuComponent.vue'
 
 // import Individual from './views/Individual.vue'
-import DataFilter from './components/Filter.vue'
-import ExportComponent from './components/ExportComponent.vue'
+
 export default {
   name: 'App',
   props: ['source'],
   components: {
     Overview, SurveyView,
     Individual: () => import('./views/Individual.vue'),
-    DataFilter, ExportComponent
+
+      MenuComponent
   },
 
   data () {
@@ -185,8 +172,7 @@ export default {
         const users = this.users;
         const questions = this.questions;
          this.oldData = this.users;
-        this.$store.commit('changeUsers', {users, questions});
-        this.$store.commit('ConfigureAnswers');
+
     }
 }
 </script>

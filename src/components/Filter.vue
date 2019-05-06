@@ -1,5 +1,6 @@
 <template>
     <div>
+
         <v-menu offset-y v-if="showMenu">
             <template v-slot:activator="{ on }">
                 <v-btn
@@ -16,21 +17,23 @@
                 <v-list-tile
                         :key="index"
                         @click="selectItem(index)"
-                        v-for="(item, index) in $store.state.questions"
+                        v-for="(item, index) in $store.state.configuredSurvey"
                 >
-                    <v-list-tile-title>{{ item.questionTitle }}</v-list-tile-title>
+                    <v-list-tile-title>{{ item.Title }}</v-list-tile-title>
                 </v-list-tile>
             </v-list>
         </v-menu>
         <div v-else>
-            <div v-for="(keuzes, index) in $store.state.questions[filterStatus].questionChoices">
+           Q{{filterStatus}}: {{$store.state.configuredSurvey[filterStatus].Title}}
+            <div class="mt-2">
+            <div v-for="(keuzes, index) in $store.state.configuredSurvey[filterStatus].questionChoices">
                 <v-checkbox
-                        :label="keuzes" :value="$store.state.questions[filterStatus].questionChoices[index]"
-                        color="#707171" v-model="filterVModel[filterStatus].choices">
+                        :label="keuzes" :value="$store.state.configuredSurvey[filterStatus].questionChoices[index]"
+                        color="#707171" v-model="filterVModel[filterStatus].choices" class="selectievakje">
                 </v-checkbox>
             </div>
-
-            <v-btn @click="showMenu = true">Discard</v-btn>
+            </div>
+            <v-btn @click="discardFilter">Discard</v-btn>
 
             <v-btn @click="saveFilter(filterVModel[filterStatus].choices, filterStatus)">Save</v-btn>
         </div>
@@ -51,7 +54,7 @@
 
         data() {
             return {
-                showMenu: false,
+                showMenu: true,
                 filterStatus: 0,
                 selectedChoice: [],
                 filterVModel: [],
@@ -60,12 +63,17 @@
         methods: {
             selectItem(index) {
                 this.showMenu = false;
+                this.$store.state.filterActive = true;
                 this.filterStatus = index;
 
             }, saveFilter(answers, question) {
                 this.showMenu = true;
+                this.$store.state.filterActive = false;
                 this.selectedChoice = [];
                 this.FilterConfig(answers, question);
+            },discardFilter(){
+                this.showMenu = true;
+                this.$store.state.filterActive = false;
             },
             FilterConfig(answer, question) {
                 const filterExists = this.filterExists(answer, question);
@@ -104,7 +112,7 @@
             }
         }, created() {
             const array = [];
-            for (let vraag in this.$store.state.questions) {
+            for (let vraag in this.$store.state.configuredSurvey) {
                 array.push({"questionNr": vraag, choices: []});
             }
             this.filterVModel = array;
@@ -115,5 +123,9 @@
 <style>
     .menuButton {
         width: 100%;
+    }
+    .selectievakje{
+        padding: 0 !important;
+        margin-top: 0 !important;
     }
 </style>

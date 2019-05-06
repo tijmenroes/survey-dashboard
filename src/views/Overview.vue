@@ -1,15 +1,15 @@
 <template>
     <div>
           <div>
-              {{$store.state.userAnswers}}
+        {{$store.state.configuredSurvey}}
             <v-container grid-list-xs>
 
                 <v-layout ref="printMe" row style="background-color: white" wrap>
-                    <v-flex :key="i" :lg4="!chart.bigDiv" :lg8="chart.bigDiv" md6 pa-3 v-for="(chart,i) in pieArray.charts"
+                    <v-flex :key="i" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" md6 pa-3 v-for="(chart,i) in pieArray.charts"
                             xs12>
                         <v-expansion-panel
                                 expand
-                                style="border: 1px solid rgb(221, 221, 221)"
+
                                 v-model="panel[i]"
                         >
                             <v-expansion-panel-content>
@@ -19,9 +19,11 @@
                                     </div>
                                 </template>
                                 <div class="cardContent" v-if="chart.zerovalues === false">
-                                    <!--<v-btn small rounded depressed class="text-none" @click="chart.menuShow =! chart.menuShow" color="#475A64"  dark v-if="!chart.menuShow">Aanpassen</v-btn>-->
-
+                                        <v-container>
+                                            Antwoorden: {{reactiveData[i].SumAnswers}}
+                                        </v-container>
                                     <div>
+
                                     <span v-for="(button,index) in buttons">
                                                 <v-btn @click="chart.menuNumber = index" depressed flat>
                                                     <span @click="chart.menuShow =! chart.menuShow "
@@ -119,8 +121,8 @@
             'v-chart': ECharts,
         },
         mounted() {
-            this.$store.watch(this.$store.getters.getData, configured => {
-                this.reactiveData = configured;
+            this.$store.watch(this.$store.getters.getData, configuredSurvey => {
+                this.reactiveData = configuredSurvey;
                 this.drawCharts();
             })
         },
@@ -149,14 +151,13 @@
                 panel: [],
                 qData: [],
                 menuNumber: 0,
-                reactiveData: this.$store.state.configured
+                reactiveData: this.$store.state.configuredSurvey
             }
         },
         methods: {
             AddMiddleLine(index){
 
-              //  this.pieArray.charts[index].mediumShow =! this.pieArray.charts[index].mediumShow;
-                //console.log(this.pieArray.charts[index].mediumShow);
+
                 if(this.pieArray.charts[index].mediumShow){
                     this.pieArray.charts[index].series[0].markLine.data = [{"type": "average"}]
                 } else {
@@ -194,27 +195,30 @@
 
                 if (option === 0) {
                     grafiek.series[0].type = 'line';
-                    grafiek.yAxis.show = true;
-
                 } else if (option === 1) {
-                    grafiek.yAxis.show = true;
-                    grafiek.xAxis.show = true;
+                    console.log(grafiek.yAxis.data);
+                    console.log(grafiek.xAxis.data);
                     grafiek.series[0].type = 'bar';
+                    grafiek.series[0].itemStyle.borderWidth = 0;
                 } else if (option === 2) {
-                    grafiek.yAxis.show = true;
-                    grafiek.xAxis.show = true;
+
                     grafiek.series[0].type = 'bar';
+                   grafiek.xAxis.type = 'value';
                     grafiek.yAxis.type = 'category';
-                    grafiek.xAxis.type = 'value';
+                    grafiek.series[0].itemStyle.borderWidth = 0;
+                    grafiek.yAxis.data = grafiek.xAxis.data;
+                    console.log(grafiek.yAxis.data)
 
                 } else if (option === 3) {
                     grafiek.series[0].markLine.data = null;
+                    grafiek.series[0].itemStyle.borderWidth = 2.3;
                     grafiek.series[0].type = 'pie';
                     grafiek.series[0].radius = ['45%', '75%'];
                     grafiek.yAxis.show = false;
                     grafiek.xAxis.show = false;
                 } else if (option === 4) {
                     grafiek.series[0].markLine.data = null;
+                    grafiek.series[0].itemStyle.borderWidth = 2.3;
                     grafiek.series[0].type = 'pie';
                     grafiek.series[0].radius = ['0%', '75%'];
                     grafiek.yAxis.show = false;
@@ -224,7 +228,21 @@
 
             drawCharts() {
                 for (let chart in this.pieArray.charts) {
-                    this.pieArray.charts[chart].series[0].data = this.reactiveData[chart].questionAnswers
+                    this.pieArray.charts[chart].series[0].data = this.reactiveData[chart].questionAnswers;
+
+                    let allowed = 0;
+                    for(let optie in this.reactiveData[chart].questionAnswers){
+
+                        if (this.reactiveData[chart].questionAnswers[optie].value !== null) {
+                            allowed++;
+                        }
+                    }
+
+                    if(allowed === 0){
+                        this.pieArray.charts[chart].zerovalues = true;
+                    } else{
+                        this.pieArray.charts[chart].zerovalues = false
+                    }
                 }
             },
 
@@ -236,15 +254,17 @@
             };
 
             for (let key in this.reactiveData) {
-                var allowed = 0;
+                let allowed = 0;
                 for (let optie in this.reactiveData[key].questionAnswers) {
 
-                    if (this.reactiveData[key].questionAnswers[optie].value != null) {
-                        allowed++
+                    if(this.reactiveData[key].questionAnswers[optie].value != null) {
+
+                        allowed++;
+                        break;
                     }
                 }
                 if (allowed > 0) {
-                    this.pieArray.charts.push({
+                    const chart ={
                         bigDiv: false,
                         zerovalues: false,
                         menuShow: true,
@@ -269,7 +289,7 @@
                                 borderWidth: 2.3,
                             },
                             label: {
-                               // show: true,
+                                // show: true,
                                 formatter: '{d}%',
                                 position: 'inside'
                             },
@@ -283,13 +303,27 @@
                                 opacity: 0.4
                             },
                             markLine: {
-                                show:false,
+                                show: false,
                                 silent: true,
                                 symbolSize: 0,
                                 data: null
                             }
                         }]
-                    })
+
+                    };
+                    if(this.reactiveData[key].Type > 0 ){
+                        const grafiek = chart;
+                        grafiek.chartType = 1;
+
+                       grafiek.yAxis.show = true;
+                       grafiek.xAxis.show = true;
+                        grafiek.series[0].type = 'bar';
+                        grafiek.series[0].itemStyle.borderWidth = 0;
+                        if(this.reactiveData[key].Type > 1){
+                            grafiek.bigDiv = true;
+                        }
+                    }
+                        this.pieArray.charts.push(chart)
                 } else {
                     console.log('zero values fam');
                     this.pieArray.charts.push({zerovalues: true})

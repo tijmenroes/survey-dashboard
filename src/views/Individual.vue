@@ -1,10 +1,9 @@
 <template>
     <div>
 
-        {{users}}
         <v-container fluid grid-list-xs>
             <v-layout wrap>
-                <v-flex xs10 class="pa-3">
+
                     <v-card>
                         <v-card-title>
                             Individual Responses
@@ -20,10 +19,11 @@
                         <v-data-table
                                 v-model="selected"
                                 :headers="headers"
-                                :items="desserts"
-                                item-key="name"
+                                :items="rows"
+                                item-key="id"
                                 select-all
                                 :search="search"
+                                :pagination.sync="pagination"
                         >
                             <template slot="headerCell" slot-scope="props" style="width:20px">
                                 <v-tooltip bottom>
@@ -56,7 +56,7 @@
                             </v-alert>
                         </v-data-table>
                     </v-card>
-                </v-flex>
+
             </v-layout>
             <v-btn @click="jsonConvert">Export to Excel</v-btn>
             <v-dialog
@@ -78,8 +78,6 @@
 </template>
 <script>
     export default {
-        name: 'Individual',
-        props: ['users', 'questions'],
         created() {
             this.configureHeaders();
             this.configureRows();
@@ -89,27 +87,17 @@
                 dialog: false,
                 dialogText: '',
                 pagination: {
-                    sortBy: 'name'
+                    descending: true,
+                    rowsPerPage: 10,
+                    //totalItems: 69,
+                    sortBy: "id",
+                    page: 1,
                 },
-                reactiveUsers: this.users,
                 search: '',
                 selected: [],
-                lol: [{"name": "13-06-2019 16:06:32"}, {"q1": "Niet normaal hoe tevreden ik ben echt niet normaal het is gewoon echt abnormaal ik ben zo tevreden"}, {
-                    "q2": "Super, maar dan ook echt super tevreden zeg",
-                    "q3": "De stoelen zaten erg oncomfortabel",
-                    "q4": "Tevreden",
-                    "q5": "Niet normaal hoe tevreden ik ben echt niet normaal het is gewoon echt abnormaal ik ben zo tevreden",
-                    "q6": "Niet normaal hoe tevreden ik ben echt niet normaal "
-                }],
-                headers: [
-                    // {text: 'Date time', value: 'name'},
-                    {text: 'Q0.', value: "q0"},
-                    {text: 'Q1.', value: "q1"},
-                    {text: 'Q2. Bent u tevreden over uw laatste bezoek?', value: 'q2'},
-                    {text: 'Q3. Bent u tevreden over uw laatste bezoek?', value: 'q3'},
-
-                ],
-                desserts: []
+                headers: [],
+                desserts: [],
+                rows: [],
             }
         }, methods: {
             openDialog(info) {
@@ -118,28 +106,55 @@
             },
             configureHeaders() {
                 let headerArray = [];
-                for (let question in this.questions) {
-                    var text = 'Q' + question.toString() + '. ' + this.questions[question].questionTitle;
+                headerArray.push({text: "ID", value: "id"});
+                headerArray.push({text: "dateTime", value: "dateTime"});
+                const questions = this.$store.state.surveyQuestions;
+                for (let question in questions) {
+                    var text = 'Q' + question.toString() + '. ' + questions[question].title;
                     var number = 'q' + question.toString();
                     headerArray.push({text: text, value: number})
                 }
                 this.headers = headerArray;
             }, configureRows(){
-                this.desserts = [];
-                for (let user in this.users) {
-                    let userArray = {'answers': {}};
-                    for (let answer  in this.users[user].answers) {
+                this.rows = [];
+                const users = this.$store.state.surveyAnswers;
 
-                        var antwoord = 'q' + answer.toString();
+                for (let user in users) {
+                    let date = new Date(users[user].dateTime);
+                    let month = date.getMonth() + 1;
+                    month = this.checkTime(month);
+                    let day = date.getDay() + 1;
+                    day = this.checkTime(day);
+                    let yr = date.getFullYear();
+                    let m = date.getMinutes();
+                    m = this.checkTime(m);
 
-                        // userArray.answers.push([antwoord]: this.users[user].answers[answer])
-                        userArray.answers[antwoord] = this.users[user].answers[answer]
+                    let h  = date.getHours();
+                    h = this.checkTime(h);
 
+                    let userArray =  {"id": user, "dateTime": day + '-' + month + '-' + yr + ' ' + h + ':'+  m };
+                    for (let answer  in users[user].answers) {
+                        if(typeof users[user].answers !== "undefined"){
+                            if(typeof users[user].answers[answer] === "object" && users[user].answers[answer] !== "null"){
+                                const answerArray = [];
+                                for(let keuze in users[user].answers[answer]){
+                                    answerArray.push( " " +users[user].answers[answer][keuze].toString() )
+                                }
+                                const antwoord = 'q' + answer.toString();
+                                userArray[antwoord] = answerArray.toString()
+
+                            }else {
+                            const antwoord = 'q' + answer.toString();
+                            userArray[antwoord] = users[user].answers[answer]
+                            }
+                        }
                     }
-                   // this.desserts = [];
-                    this.desserts.push(userArray.answers);
+                    this.rows.push(userArray);
                 }
-                // console.log(userArray)
+            },
+            checkTime(i) {
+            if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+            return i;
             },
             jsonConvert() {
 
