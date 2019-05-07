@@ -4,6 +4,7 @@
         Klik op overview of individual
 
         data:
+        {{$store.state.surveyAnswers}}
         <hr>
         {{$store.state.configuredSurvey}}
         <!--<v-container fluid >-->
@@ -89,6 +90,7 @@
                 })
             }, logSurvey(id){
                 this.$store.state.loading = true;
+                console.log(id);
                 axios.get('https://survey-api.test.tc8l.nl/api/survey/questions/' + id)
                     .then(response => {
 
@@ -161,7 +163,7 @@
 
         }, created(){
             this.fetchSurvey();
-            this.logSurvey(24000);
+            this.logSurvey(24103);
 
 
 

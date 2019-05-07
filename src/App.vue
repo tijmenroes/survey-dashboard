@@ -1,7 +1,7 @@
 <template>
   <v-app class="app">
     <v-content>
-
+{{pageNumber}}
         <v-dialog
                 v-model="$store.state.loading"
 
@@ -37,9 +37,10 @@
           </v-flex>
       <Individual v-else-if="pageNumber === 1"></Individual>
 
-        <div v-else>
+        <div v-else-if="pageNumber === 0">
         <SurveyView></SurveyView>
         </div>
+          <GAView v-else></GAView>
       </keep-alive>
 
           <v-flex md2 sm12 v-if="pageNumber === 2">
@@ -60,8 +61,8 @@
 import Overview from "./views/Overview.vue";
 import SurveyView from "./views/SurveyView.vue";
 import MenuComponent from './components/MenuComponent.vue'
+import GAView from './components/GAnalytics.vue'
 
-// import Individual from './views/Individual.vue'
 
 export default {
   name: 'App',
@@ -69,7 +70,7 @@ export default {
   components: {
     Overview, SurveyView,
     Individual: () => import('./views/Individual.vue'),
-
+      GAView,
       MenuComponent
   },
 
@@ -84,22 +85,8 @@ export default {
       lol: [],
       supertof: null,
       data: [],
-      questions:[{
-        "questionTitle": "Welk genre is jouw favoriet?",
-        "questionChoices": ["Actie","Drama", "Familie"],
-        "questionAnswers": []
-      },
-        {
-          "questionTitle": "Welk tijdstip ga je meestal naar de film?",
-          "questionChoices": ["Ochtend", "Middag", "Avond"],
-          "questionAnswers": []
-        },
-        {
-          "questionTitle": "Hoe tevreden ben je over de klantenservice?",
-          "questionChoices": ["Tevreden","Gemiddeld", "Ontevreden"],
-          "questionAnswers": []
-        }],
-      buttons: ["Statistics", "Individual", "Overview"],
+
+      buttons: ["Statistics", "Individual", "Overview", "Google Analytics"],
 
     }
   },

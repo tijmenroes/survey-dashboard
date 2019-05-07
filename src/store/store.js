@@ -36,20 +36,24 @@ export const store = new Vuex.Store({
         },
         addFilter(state, {answer, question}) {
             const array = [];
-
+            let counter = 0;
             for (let key in state.surveyAnswers) {
                 for (let aantal in answer) {
-
+                    console.log(state.surveyAnswers[key].answers);
                     if(typeof state.surveyAnswers[key].answers[question] === "object" ) {
+
                             for (let entry in state.surveyAnswers[key].answers) {
+
+
                                 if(typeof state.surveyAnswers[key].answers[question][entry] === "string" ) {
+                                    counter++
                                 if (state.surveyAnswers[key].answers[question][entry] === answer[aantal]) {
-                                    console.log('sdf');
+
                                     array.push(state.surveyAnswers[key])
                                 }
                             }
                             }
-
+               //     console.log(counter);
                     } else{
 
                         if (state.surveyAnswers[key].answers[question] === answer[aantal]) {
@@ -70,9 +74,9 @@ export const store = new Vuex.Store({
             state.surveyAnswers = state.surveyOldData;
             const array = [];
             let questionType = 0;
-            console.log('FILTER DELETED');
+
             if(state.filters.length > 0) {
-                console.log('MEER DAN 0');
+
                 for (let filter in state.filters) {
                     const question = state.filters[filter].Code[0].q;
                     const answer = state.filters[filter].Code[0].a;
@@ -92,13 +96,13 @@ export const store = new Vuex.Store({
 
             }
         },  ConfigureAnswers(state) {
-            console.log('configure Started from survey');
+
             state.configuredSurvey = [];
             const dataArray = [];
             function countInArray(array, what) {
                 var count = 0;
                 let tempArray = {};
-
+                console.log(array.length);
                 if(typeof array[0]  === "object"){
                     for(let entry in array){
 
@@ -132,12 +136,13 @@ export const store = new Vuex.Store({
                 let questionType = 0;
                const answerArray = [];
                const vraagArray = [];
-
+               // console.log(state.surveyQuestions);
                for (let user in state.surveyAnswers) {
-
+                  //  console.log(user);
                     answerArray.push(state.surveyAnswers[user].answers[key]);
-                   // console.log(answerArray);
+
                }
+                 console.log(answerArray);
                 if(state.surveyQuestions[key].type === "rating" ){
                     questionType = 2;
                     const min = state.surveyQuestions[key].rateMin;
@@ -148,29 +153,31 @@ export const store = new Vuex.Store({
                         const string = i.toString();
                         optionArray.push(string);
                         const get = countInArray(answerArray, string);
-                        console.log(answerArray.length);
+
                         vraagArray.push(get);
 
                     }
 
                     state.surveyQuestions[key].choices = optionArray;
                 } else {
-                    //console.log(state.surveyQuestions[key].choices.length);
-                  //  console.log(answerArray);
+
                     if(state.surveyQuestions[key].choices.length > 4){
-                        console.log('SUPERLANG');
+
                         questionType = 1;
                     }
                     for (let vraag in state.surveyQuestions[key].choices) {
                         const get = countInArray(answerArray, state.surveyQuestions[key].choices[vraag]);
-                        vraagArray.push(get);
+                          vraagArray.push(get);
+                      //  console.log(answerArray);
+                      //  console.log(state.surveyQuestions[key].choices[vraag]);
                     }
                 }
-                console.log(vraagArray);
+
                 let aantal = 0;
                 for(let antwoord in vraagArray){
                    aantal = aantal + vraagArray[antwoord].value;
                 }
+              //  console.log(vraagArray)
                 dataArray.push({
                     "Title": state.surveyQuestions[key].title,
                     "questionChoices": state.surveyQuestions[key].choices,
