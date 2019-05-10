@@ -10,7 +10,7 @@
     <span class="grey--text">Status: Open </span>
 
     <v-divider class="pa-1"></v-divider>
-    <v-btn dark round class="menuButton text-none" color="#475963"> Herstel pagina</v-btn>
+    <v-btn dark round class="menuButton text-none" color="#475963" @click="restorePage"> Herstel pagina</v-btn>
     <ExportComponent :toPrint="toPrint"></ExportComponent>
     <div class="headline">Filters</div>
     <v-divider></v-divider>
@@ -35,6 +35,13 @@
         props: ['toPrint'],
         components: {
             DataFilter, ExportComponent
+        },
+        methods:{
+            restorePage(){
+                this.$store.commit('resetData');
+                this.$store.commit('ConfigureAnswers');
+                //this.$emit('resetPage');
+            }
         }
     }
 </script>

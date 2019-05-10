@@ -1,6 +1,6 @@
 <template>
     <div>
-        lolz <v-btn @click="Analyse"></v-btn>
+            empty
     </div>
 </template>
 

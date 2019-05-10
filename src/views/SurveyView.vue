@@ -1,46 +1,28 @@
 <template>
     <div>
 
-        Klik op overview of individual
+        <v-container fluid >
+            <v-layout wrap>
+                <v-flex xs12 md9 class="pa-3">
+                    <v-data-table
+                            :headers="surveyHeaders"
+                            :items="surveys"
+                            class="elevation-1"
+                            :pagination.sync="pagination"
+                    >
+                        <template v-slot:items="props">
 
-        data:
-        {{$store.state.surveyAnswers}}
-        <hr>
-        {{$store.state.configuredSurvey}}
-        <!--<v-container fluid >-->
-            <!--<v-layout wrap>-->
-                <!--<v-flex xs12 md9 class="pa-3">-->
-                    <!--<v-data-table-->
-                            <!--:headers="surveyHeaders"-->
-                            <!--:items="surveys"-->
-                            <!--class="elevation-1"-->
-                            <!--:pagination.sync="pagination"-->
-                    <!--&gt;-->
-                        <!--<template v-slot:items="props">-->
+                            <td >{{ props.item.id }}</td>
+                            <td>{{ props.item.title }}</td>
+                            <td @click="logSurvey(props.item.id)"> <v-icon small>arrow_forward</v-icon></td>
 
-                            <!--<td >{{ props.item.id }}</td>-->
-                            <!--<td>{{ props.item.title }}</td>-->
-                            <!--<td @click="logSurvey(props.item.id)"> <v-icon small>arrow_forward</v-icon></td>-->
+                        </template>
+                    </v-data-table>
+                </v-flex>
+            </v-layout>
 
-                        <!--</template>-->
-                    <!--</v-data-table>-->
-                <!--</v-flex>-->
-            <!--</v-layout>-->
+        </v-container>
 
-        <!--</v-container>-->
-        <!--{{questions}}-->
-        <!--<hr>-->
-       <!--&lt;!&ndash;// {{answers[2][3].toString()}}&ndash;&gt;-->
-        <!--{{answers}}-->
-
-
-        <!--<hr>-->
-        <!--<h1>Store 2</h1>-->
-        <!--{{$store.state.surveyAnswers}}-->
-        <!--<hr>-->
-        <!--{{$store.state.surveyQuestions}}-->
-        <!--<hr>-->
-        <!--{{$store.state.configuredSurvey}}-->
     </div>
 </template>
 
@@ -163,7 +145,7 @@
 
         }, created(){
             this.fetchSurvey();
-            this.logSurvey(24103);
+         //   this.logSurvey(24103);
 
 
 

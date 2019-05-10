@@ -1,11 +1,11 @@
 <template>
     <div>
           <div>
-        {{$store.state.configuredSurvey}}
-            <v-container grid-list-xs>
 
+            <v-container grid-list-xs>
+                Weergave: <v-btn @click="dashboardview"> Dash</v-btn> <v-btn @click="listview"> List</v-btn>
                 <v-layout ref="printMe" row style="background-color: white" wrap>
-                    <v-flex :key="i" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" md6 pa-3 v-for="(chart,i) in pieArray.charts"
+                    <v-flex :key="i" :lg12="chart.isList" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" md6 pa-3 v-for="(chart,i) in pieArray.charts"
                             xs12>
                         <v-expansion-panel
                                 expand
@@ -65,14 +65,16 @@
                                                     </div>
                                                     <div v-else>
                                                         <v-layout row wrap>
+
                                                             <v-radio-group @change="displayHandler(chart.radioGroup, i)"
                                                                            v-model="chart.radioGroup">
-                                                                <v-radio :value="0" label="Geen Cijfers"></v-radio>
-                                                                <v-radio :value="1" label="Absolute Cijfers"></v-radio>
-                                                                <v-radio :value="2" label="Percentage"
+                                                                <v-radio :value="0" color="#455A64" label="Geen Cijfers"></v-radio>
+                                                                <v-radio :value="1" color="#455A64"  label="Absolute Cijfers"></v-radio>
+                                                                <v-radio :value="2" color="#455A64"  label="Percentage"
                                                                          v-if="chart.chartType > 2"></v-radio>
                                                             </v-radio-group>
-                                                            <v-checkbox v-model="chart.mediumShow" v-if="chart.chartType < 2" label="Gemiddelde" @change="AddMiddleLine(i)"></v-checkbox>
+
+                                                            <v-checkbox v-model="chart.mediumShow" color="#455A64" v-if="chart.chartType < 3" label="Gemiddelde" @change="AddMiddleLine(i)"></v-checkbox>
                                                         </v-layout>
                                                         <v-btn @click="chart.menuShow =! chart.menuShow" class="text-none" color="#475A64" dark
                                                                small>Ga Terug
@@ -120,12 +122,7 @@
 
             'v-chart': ECharts,
         },
-        mounted() {
-            this.$store.watch(this.$store.getters.getData, configuredSurvey => {
-                this.reactiveData = configuredSurvey;
-                this.drawCharts();
-            })
-        },
+
         data() {
             return {
                 options: [{"icon": "show_chart", "text": "Lijngrafiek"}, {
@@ -155,6 +152,16 @@
             }
         },
         methods: {
+            listview(){
+              for(let key in this.pieArray.charts){
+                  this.pieArray.charts[key].isList = true;
+                 }
+              },
+                dashboardview(){
+                    for(let key in this.pieArray.charts){
+                        this.pieArray.charts[key].isList = false;
+                    }
+                },
             AddMiddleLine(index){
 
 
@@ -165,6 +172,7 @@
                 }
             },
             displayHandler(nummer, index) {
+
                 if (nummer === 0) {
                     this.pieArray.charts[index].series[0].label.show = false;
                 } else if (nummer === 1) {
@@ -179,6 +187,7 @@
             toLine(graph, option) {
 
                 const grafiek = this.pieArray.charts[graph];
+                this.AddMiddleLine(graph);
                 //Reset Graph
 
                 grafiek.chartType = option;
@@ -245,95 +254,107 @@
                     }
                 }
             },
+            initOverview(){
+                this.pieArray = {
+                    charts: []
+                };
+                console.log(this.reactiveData);
+                for (let key in this.reactiveData) {
+                    let allowed = 0;
+                    console.log('hahawow');
+                    for (let optie in this.reactiveData[key].questionAnswers) {
 
-        },
-        created() {
+                        if(this.reactiveData[key].questionAnswers[optie].value != null) {
 
-            this.pieArray = {
-                charts: []
-            };
-
-            for (let key in this.reactiveData) {
-                let allowed = 0;
-                for (let optie in this.reactiveData[key].questionAnswers) {
-
-                    if(this.reactiveData[key].questionAnswers[optie].value != null) {
-
-                        allowed++;
-                        break;
-                    }
-                }
-                if (allowed > 0) {
-                    const chart ={
-                        bigDiv: false,
-                        zerovalues: false,
-                        menuShow: true,
-                        mediumShow: false,
-                        menuNumber: 1,
-                        radioGroup: 2,
-                        chartType: 3,
-                        legend: {},
-                        tooltip: {},
-                        xAxis: {
-                            show: false,
-                            data: this.reactiveData[key].questionChoices
-                        },
-                        yAxis: {show: false},
-                        series: [{
-                            type: 'pie',
-                            radius: ['45%', '75%'],
-                            color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
-                            data: this.reactiveData[key].questionAnswers,
-                            itemStyle: {
-                                borderColor: 'white',
-                                borderWidth: 2.3,
-                            },
-                            label: {
-                                // show: true,
-                                formatter: '{d}%',
-                                position: 'inside'
-                            },
-                            // color: "#3a84dd",
-                            smooth: true,
-                            symbolSize: 6,
-                            lineStyle: {
-                                width: 3.5
-                            },
-                            areaStyle: {
-                                opacity: 0.4
-                            },
-                            markLine: {
-                                show: false,
-                                silent: true,
-                                symbolSize: 0,
-                                data: null
-                            }
-                        }]
-
-                    };
-                    if(this.reactiveData[key].Type > 0 ){
-                        const grafiek = chart;
-                        grafiek.chartType = 1;
-
-                       grafiek.yAxis.show = true;
-                       grafiek.xAxis.show = true;
-                        grafiek.series[0].type = 'bar';
-                        grafiek.series[0].itemStyle.borderWidth = 0;
-                        if(this.reactiveData[key].Type > 1){
-                            grafiek.bigDiv = true;
+                            allowed++;
+                            break;
                         }
                     }
+                    if (allowed > 0) {
+                        const chart ={
+                            bigDiv: false,
+                            isList: false,
+                            zerovalues: false,
+                            menuShow: true,
+                            mediumShow: false,
+                            menuNumber: 1,
+                            radioGroup: 2,
+                            chartType: 3,
+                            legend: {},
+                            tooltip: {},
+                            xAxis: {
+                                show: false,
+                                data: this.reactiveData[key].questionChoices
+                            },
+                            yAxis: {show: false},
+                            series: [{
+                                type: 'pie',
+                                radius: ['45%', '75%'],
+                                color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
+                                data: this.reactiveData[key].questionAnswers,
+                                itemStyle: {
+                                    borderColor: 'white',
+                                    borderWidth: 2.3,
+                                },
+                                label: {
+                                    // show: true,
+                                    formatter: '{d}%',
+                                    position: 'inside'
+                                },
+                                // color: "#3a84dd",
+                                smooth: true,
+                                symbolSize: 6,
+                                lineStyle: {
+                                    width: 3.5
+                                },
+                                areaStyle: {
+                                    opacity: 0.4
+                                },
+                                markLine: {
+                                    show: false,
+                                    silent: true,
+                                    symbolSize: 0,
+                                    data: null
+                                }
+                            }]
+
+                        };
+                        if(this.reactiveData[key].Type > 0 ){
+                            const grafiek = chart;
+                            grafiek.chartType = 1;
+
+                            grafiek.yAxis.show = true;
+                            grafiek.xAxis.show = true;
+                            grafiek.series[0].type = 'bar';
+                            grafiek.series[0].itemStyle.borderWidth = 0;
+                            if(this.reactiveData[key].Type > 1){
+                                grafiek.bigDiv = true;
+                            }
+                        }
                         this.pieArray.charts.push(chart)
-                } else {
-                    console.log('zero values fam');
-                    this.pieArray.charts.push({zerovalues: true})
+                    } else {
+                        console.log('zero values fam');
+                        this.pieArray.charts.push({zerovalues: true})
+                    }
                 }
+                const tempPanel = [];
+                for (let key in this.pieArray.charts) {
+                    tempPanel.push(0)
+                }
+                this.panel = tempPanel;
             }
-            const tempPanel = [];
-            for (let key in this.pieArray.charts) {
-                tempPanel.push(0)
-            }
-            this.panel = tempPanel;
+        },mounted() {
+
+
+            this.initOverview();
+            this.$store.watch(this.$store.getters.getData, configuredSurvey => {
+                this.reactiveData = configuredSurvey;
+                console.log(this.reactiveData);
+                this.drawCharts();
+            });
+            this.$store.watch(this.$store.getters.getReset, reset => {
+                    this.initOverview();
+            })
         }
     }
 </script>

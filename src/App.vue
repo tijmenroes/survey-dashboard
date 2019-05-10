@@ -1,7 +1,12 @@
 <template>
   <v-app class="app">
     <v-content>
-{{pageNumber}}
+
+
+        <div class="pageButtons">
+            <span v-for="(button,index) in buttons"> <v-btn class="Vuebutton text-none" @click="pageNumber = index" flat depressed>{{button}}</v-btn> </span>
+        </div>
+
         <v-dialog
                 v-model="$store.state.loading"
 
@@ -23,13 +28,11 @@
             </v-card>
         </v-dialog>
 
-      <div class="pageButtons">
-      <span v-for="(button,index) in buttons"> <v-btn class="Vuebutton text-none" @click="pageNumber = index" flat depressed>{{button}}</v-btn> </span>
-      </div>
-<div style="width:100%;">x</div>
-<p style="opacity:0">x</p>
 
-<v-layout>
+
+        <div style="height: 100px"></div>
+
+<v-layout v-if="$store.state.configuredSurvey.length > 0">
 
       <keep-alive>
           <v-flex md10 sm12 ref="printMe" v-if="pageNumber === 2">
@@ -47,11 +50,12 @@
 
             <v-card class="menu">
 
-                <MenuComponent :toPrint="$refs"></MenuComponent>
+                <MenuComponent :toPrint="$refs" ></MenuComponent>
 
           </v-card>
             </v-flex>
 </v-layout>
+
     </v-content>
   </v-app>
 </template>
@@ -62,7 +66,7 @@ import Overview from "./views/Overview.vue";
 import SurveyView from "./views/SurveyView.vue";
 import MenuComponent from './components/MenuComponent.vue'
 import GAView from './components/GAnalytics.vue'
-
+import axios from 'axios'
 
 export default {
   name: 'App',
@@ -76,7 +80,7 @@ export default {
 
   data () {
     return {
-      pageNumber: 0,
+      pageNumber: 2,
       oldData: [],
 
       filters: [],
@@ -89,76 +93,77 @@ export default {
       buttons: ["Statistics", "Individual", "Overview", "Google Analytics"],
 
     }
-  },
+  },methods:{
+        logSurvey(id){
+            this.$store.state.loading = true;
+            console.log(id);
+            axios.get('https://survey-api.test.tc8l.nl/api/survey/questions/' + id)
+                .then(response => {
+
+                    //    console.log(response.data.data.pages[0].questions);
+                    this.questions = response.data.data.pages[0].questions;
+                    this.$store.commit('setSurveyQuestions', response.data.data.pages[0].questions);
+                    //const resultArray = [];
+
+                    //this.questions = resultArray; //Link m aan de display
+                    axios.get('https://survey-api.test.tc8l.nl/api/survey/answers/' + id)
+                        .then(output => {
+                            //console.log(response.data.data);
+                            //  this.answers = response.data.data;
+
+                            const userArray = [];
+                            for(let user in output.data.data) {
+                                //const AnswerArray = [];
+                                const  AnswerArray = Object.values(output.data.data[user].answers);
+                                userArray.push({"dateTime": output.data.data[user].dateTime, "answers": AnswerArray})
+                            }
+
+                            this.answers = userArray;
+
+                            this.$store.commit('setUserData', userArray);
+                            this.$store.commit('ConfigureAnswers');
+                            //const resultArray = [];
+                            this.$store.state.loading = false;
+                        }).catch(error => {
+
+                        // error = error.toString();
+                        // if(error.includes('code 500')){
+                        //     this.errorText = "Bestaat niet"
+                        // }else if(error.includes('undefined')) {
+                        //     this.errorText = "Geen vragen/ niet goed opgesteld"
+                        // } else {
+                        //     this.errorText = "Gewoon een error"
+                        // }
+                        // // this.errorText = error;
+                        // this.noError = false
+                        // // this.$store.state.loading = false;
+
+                    });
+                    this.$store.state.loading = false;
+                }).catch(error => {
+                //
+                // error = error.toString();
+                // if(error.includes('code 500')){
+                //     this.errorText = "Bestaat niet"
+                // }else if(error.includes('undefined')) {
+                //     this.errorText = "Geen vragen/ niet goed opgesteld"
+                // } else {
+                //     this.errorText = "Gewoon een error"
+                // }
+                // // this.errorText = error;
+                // this.noError = false
+                // // this.$store.state.loading = false;
+
+            });
+
+
+
+
+        }
+    },
   created(){
 
-      function getRandomInt(max) {
-        return Math.floor(Math.random() * Math.floor(max));
-      }
-      function checkRand(randomNumber){
-        var answer = '';
-        if(randomNumber === 0) {
-         answer = 'Tevreden';
-         return answer
-
-        } else  if(randomNumber === 1) {
-         answer = 'Gemiddeld';
-          return answer
-        } else  if(randomNumber === 2) {
-          answer = 'Ontevreden';
-          return answer
-        }
-      }
-      const lolarray = [];
-      for(var i = 0; i < 35; i++) {
-        var random = getRandomInt(7);
-        var random1 = getRandomInt(5);
-        var random2 = getRandomInt(3);
-
-        if(random < 3){
-          const entry1 = "Actie";
-         // console.log(checkRand(random2));
-          if(random1 > 1) {
-            const entry2 = "Avond";
-            lolarray.push({'answers':[entry1,entry2, checkRand(random2)]})
-          } else {
-            const entry2= "Middag";
-            lolarray.push({'answers':[entry1,entry2, checkRand(random2)]})
-
-          }
-        } else if ( random < 6 && random > 2) {
-          const entry1 = "Familie";
-
-          if(random1 === 1) {
-            const entry2 = "Avond";
-            lolarray.push({'answers':[entry1,entry2, checkRand(random2)]})
-          } else if(5 > random1 > 1){
-            const entry2 = "Ochtend";
-            lolarray.push({'answers':[entry1,entry2,checkRand(random2)]})
-          } else {
-            const entry2 = "Middag";
-
-            lolarray.push({'answers':[entry1,entry2 ,checkRand(random2)]})
-          }
-        } else if (random === 6) {
-          const entry1 = "Drama";
-
-          if(random1 === 1) {
-            const entry2 = "Ochtend";
-            lolarray.push({'answers':[entry1,entry2, checkRand(random2)]})
-          } else if(5 > random1 > 1){
-            const entry2 = "Middag";
-            lolarray.push({'answers':[entry1,entry2, checkRand(random2)]})
-          } else {
-            const entry2 = "Avond";
-            lolarray.push({'answers':[entry1,entry2, checkRand(random2)]})
-          }
-        }
-      }
-      this.users = lolarray;
-        const users = this.users;
-        const questions = this.questions;
-         this.oldData = this.users;
+      this.logSurvey(24103);
 
     }
 }
@@ -173,6 +178,7 @@ export default {
     float:right;
   }
   .menu {
+      margin-top: 5%;
       position: fixed;
       width: 15%;
   }

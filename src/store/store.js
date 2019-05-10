@@ -6,25 +6,17 @@ Vue.use(Vuex);
 
 export const store = new Vuex.Store({
     state: {
-        userAnswers: 12123213,
+
         surveyAnswers: [],
         filterActive: false,
         surveyQuestions: [],
         surveyOldData: [],
-        users: [],
+        reset: 0,
         filters: [],
-        oldData: [],
-        questions: [],
-        configured: [],
+
         configuredSurvey: [],
         loading: false,
     }, mutations: {
-        changeUsers(state, {users, questions}){
-            state.userAnswers  = users;
-            state.oldData = users;
-            state.users = users;
-            state.questions = questions;
-        },
         setUserData(state, users){
             state.surveyAnswers  = users;
             state.surveyOldData = users;
@@ -32,7 +24,12 @@ export const store = new Vuex.Store({
         },
         setSurveyQuestions( state, questions){
            state.surveyQuestions = questions;
+            for (let key in state.surveyQuestions) {
 
+                if(state.surveyQuestions[key].hasOther === true) {
+                    state.surveyQuestions[key].choices.push('other'); //Als other een optie is, voeg deze toe
+                }
+            }
         },
         addFilter(state, {answer, question}) {
             const array = [];
@@ -53,7 +50,7 @@ export const store = new Vuex.Store({
                                 }
                             }
                             }
-               //     console.log(counter);
+
                     } else{
 
                         if (state.surveyAnswers[key].answers[question] === answer[aantal]) {
@@ -73,7 +70,6 @@ export const store = new Vuex.Store({
             state.filters.splice(number ,1);
             state.surveyAnswers = state.surveyOldData;
             const array = [];
-            let questionType = 0;
 
             if(state.filters.length > 0) {
 
@@ -91,58 +87,49 @@ export const store = new Vuex.Store({
                         }
                     }
                 }
-
                 state.surveyAnswers = array;
-
             }
         },  ConfigureAnswers(state) {
 
             state.configuredSurvey = [];
             const dataArray = [];
             function countInArray(array, what) {
-                var count = 0;
-                let tempArray = {};
-                console.log(array.length);
-                if(typeof array[0]  === "object"){
-                    for(let entry in array){
+                let count = 0;
+                let dataEntry = {};
 
-                        for(let answer in array[entry]){
+                    for (var i = 0; i < array.length; i++) {
 
-                            if (array[entry][answer] === what) {
-
+                        if(typeof array[i]  === "object"){
+                            for(let entry in array[i]){
+                                    if (array[i][entry] === what) {
+                                        count++;
+                                    }
+                            }
+                        } else {
+                            if (array[i] === what) {
                                 count++;
-
                             }
                         }
                     }
-                } else {
-                    for (var i = 0; i < array.length; i++) {
-                        //   if (array[i].includes(what)) {
-                        if (array[i] === what) {
-                            count++;
-                        }
-                    }
-                }
-                if(count > 0 ) {
-                    tempArray = {"name": what, "value": count};
-                } else {
-                    tempArray = {"name": what, "value": null, "label": {"show": false}};
-                }
-                return tempArray;
 
+                if(count > 0 ) {
+                    dataEntry = {"name": what, "value": count};
+                } else {
+                    dataEntry = {"name": what, "value": null, "label": {"show": false}};
+                }
+                return dataEntry;
             }
 
             for (let key in state.surveyQuestions) {
                 let questionType = 0;
                const answerArray = [];
-               const vraagArray = [];
-               // console.log(state.surveyQuestions);
-               for (let user in state.surveyAnswers) {
-                  //  console.log(user);
-                    answerArray.push(state.surveyAnswers[user].answers[key]);
+               const questionArray = [];
+               let litArray = state.surveyQuestions[key].choices;
 
+               for (let user in state.surveyAnswers) {
+                    answerArray.push(state.surveyAnswers[user].answers[key]);
                }
-                 console.log(answerArray);
+
                 if(state.surveyQuestions[key].type === "rating" ){
                     questionType = 2;
                     const min = state.surveyQuestions[key].rateMin;
@@ -154,50 +141,48 @@ export const store = new Vuex.Store({
                         optionArray.push(string);
                         const get = countInArray(answerArray, string);
 
-                        vraagArray.push(get);
-
+                        questionArray.push(get);
                     }
 
                     state.surveyQuestions[key].choices = optionArray;
                 } else {
-
-                    if(state.surveyQuestions[key].choices.length > 4){
+                    if(state.surveyQuestions[key].choices.length > 5){
 
                         questionType = 1;
                     }
-                    for (let vraag in state.surveyQuestions[key].choices) {
-                        const get = countInArray(answerArray, state.surveyQuestions[key].choices[vraag]);
-                          vraagArray.push(get);
-                      //  console.log(answerArray);
-                      //  console.log(state.surveyQuestions[key].choices[vraag]);
+                    for (let vraag in litArray) {
+                        const get = countInArray(answerArray,litArray[vraag]);
+                        questionArray.push(get);
                     }
                 }
-
                 let aantal = 0;
-                for(let antwoord in vraagArray){
-                   aantal = aantal + vraagArray[antwoord].value;
+                for(let antwoord in state.surveyQuestions[key].choices){
+                   aantal = aantal + questionArray[antwoord].value;
                 }
-              //  console.log(vraagArray)
+
                 dataArray.push({
                     "Title": state.surveyQuestions[key].title,
                     "questionChoices": state.surveyQuestions[key].choices,
-                    questionAnswers: vraagArray,
+                    questionAnswers: questionArray,
                     Type: questionType,
                     SumAnswers: aantal
                 });
-               // // state.$set(state.questions[key], 'questionAnswers', vraagArray)
-                //state.questions[key].questionAnswers.push(vraagArray);
 
             }
 
             state.configuredSurvey = dataArray;
-        },
+        }, resetData(state){
+            console.log('state set');
+            state.reset++;
+            state.surveyAnswers = state.surveyOldData;
+            state.filters = [];
 
-
+        }
     }, getters : {
-       //getState: state => state.counter
+
         getData: state => () => state.configuredSurvey,
         getFilters: state => () => state.filters,
+        getReset: state => () => state.reset,
 
     }, actions : {
 
