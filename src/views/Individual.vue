@@ -1,22 +1,20 @@
 <template>
     <div>
-
+        Film Survey
+        <v-spacer></v-spacer>
+        <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Zoeken"
+                single-line
+                hide-details
+                color="#455A64"
+        ></v-text-field>
         <v-container fluid grid-list-xs>
             <v-layout wrap>
 
                     <v-card>
-                        <v-card-title>
-                            Individual Responses
-                            <v-spacer></v-spacer>
-                            <v-text-field
-                                    v-model="search"
-                                    append-icon="search"
-                                    label="Search"
-                                    single-line
-                                    hide-details
-                            ></v-text-field>
-                        </v-card-title>
-                        <v-data-table
+                                  <v-data-table
                                 v-model="selected"
                                 :headers="headers"
                                 :items="rows"
@@ -24,29 +22,32 @@
                                 select-all
                                 :search="search"
                                 :pagination.sync="pagination"
+                                :rows-per-page-text="rowsperpage"
+
                         >
-                            <template slot="headerCell" slot-scope="props" style="width:20px">
+                            <template slot="headerCell" slot-scope="props">
                                 <v-tooltip bottom>
                                     <template v-slot:activator="{ on }">
           <span v-on="on" class="text-truncate">
             {{ props.header.text }}
           </span>
                                     </template>
-                                    <span  style="width: 10px">
+                                    <span >
           {{ props.header.value }}
         </span>
                                 </v-tooltip>
                             </template>
 
                             <template slot="items" slot-scope="props">
-                                <td>
+                                <td >
                                     <v-checkbox
                                             v-model="props.selected"
                                             primary
                                             hide-details
+                                            color="#455A64"
                                     ></v-checkbox>
                                 </td>
-                                <td v-for="header in headers" :key="props.item[header]" @click="openDialog(props.item)">
+                                <td v-for="header in headers" :key="props.item[header]" @click="openDialog(props.item)" >
                                     {{props.item[header.value]}}
                                 </td>
 
@@ -58,6 +59,7 @@
                     </v-card>
 
             </v-layout>
+            <br>
             <v-btn @click="jsonConvert">Export to Excel</v-btn>
             <v-dialog
                     v-model="dialog"
@@ -98,6 +100,8 @@
                 headers: [],
                 desserts: [],
                 rows: [],
+                rowsperpage: 'Items per pagina',
+
             }
         }, methods: {
             openDialog(info) {
@@ -245,4 +249,7 @@
 
 <style scoped>
 
+table.v-table tbody tr:nth-child(even) td {
+   background-color: #fafafa;
+}
 </style>

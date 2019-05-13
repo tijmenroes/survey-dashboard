@@ -6,15 +6,13 @@ Vue.use(Vuex);
 
 export const store = new Vuex.Store({
     state: {
-
         surveyAnswers: [],
-        filterActive: false,
         surveyQuestions: [],
         surveyOldData: [],
+        configuredSurvey: [],
+        filterActive: false,
         reset: 0,
         filters: [],
-
-        configuredSurvey: [],
         loading: false,
     }, mutations: {
         setUserData(state, users){
@@ -40,7 +38,6 @@ export const store = new Vuex.Store({
                     if(typeof state.surveyAnswers[key].answers[question] === "object" ) {
 
                             for (let entry in state.surveyAnswers[key].answers) {
-
 
                                 if(typeof state.surveyAnswers[key].answers[question][entry] === "string" ) {
                                     counter++
@@ -172,7 +169,6 @@ export const store = new Vuex.Store({
 
             state.configuredSurvey = dataArray;
         }, resetData(state){
-            console.log('state set');
             state.reset++;
             state.surveyAnswers = state.surveyOldData;
             state.filters = [];
