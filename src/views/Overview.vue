@@ -2,7 +2,7 @@
     <div>
           <div>
 
-            <v-container grid-list-xs>
+            <v-container fluid grid-list-xs>
                 Weergave: <v-btn @click="dashboardview"> Dash</v-btn> <v-btn @click="listview"> List</v-btn>
                 <v-layout ref="printMe" row style="background-color: white" wrap>
                     <v-flex :key="i" :lg12="chart.isList" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" md6 pa-3 v-for="(chart,i) in pieArray.charts"
@@ -113,6 +113,7 @@
     import 'echarts/lib/component/toolbox'
     import 'echarts/lib/component/legend'
     import 'echarts/lib/component/markLine'
+
 
 
     export default {
@@ -261,7 +262,7 @@
                 console.log(this.reactiveData);
                 for (let key in this.reactiveData) {
                     let allowed = 0;
-                    console.log('hahawow');
+
                     for (let optie in this.reactiveData[key].questionAnswers) {
 
                         if(this.reactiveData[key].questionAnswers[optie].value != null) {
@@ -343,7 +344,7 @@
                 }
                 this.panel = tempPanel;
             }
-        },mounted() {
+        },created() {
 
 
             this.initOverview();

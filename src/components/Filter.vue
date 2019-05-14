@@ -1,17 +1,13 @@
 <template>
-    <div>
-
         <v-menu offset-y v-if="showMenu">
             <template v-slot:activator="{ on }">
-                <v-btn
-                        class="menuButton text-none"
-                        color="#475963"
-                        dark round
+                <div
+                        class="menuButton filterbutton"
                         v-on="on"
                 >
-                    Add Filter
-                    <v-icon right>arrow_drop_down</v-icon>
-                </v-btn>
+                    Nieuwe filter
+
+                </div>
             </template>
 
             <v-list>
@@ -27,6 +23,7 @@
         <div v-else>
            Q{{filterStatus}}: {{$store.state.configuredSurvey[filterStatus].Title}}
             <div class="mt-2">
+
             <div v-for="(keuzes, index) in $store.state.configuredSurvey[filterStatus].questionChoices">
                 <v-checkbox
                         :label="keuzes" :value="$store.state.configuredSurvey[filterStatus].questionChoices[index]"
@@ -39,13 +36,11 @@
             <v-btn @click="saveFilter(filterVModel[filterStatus].choices, filterStatus)">Save</v-btn>
         </div>
 
-        <v-btn :key="index" @click="delFilter(index)"
-               class="text-none" flat v-for="(filter,index)  in $store.state.filters">
-            Q{{filter.Question + 1}}: {{filter.Answer.toString()}}
-            <v-icon right small> close</v-icon>
-        </v-btn>
-
-    </div>
+        <!--<v-btn :key="index" @click="delFilter(index)"-->
+               <!--class="text-none" flat v-for="(filter,index)  in $store.state.filters">-->
+            <!--Q{{filter.Question + 1}}: {{filter.Answer.toString()}}-->
+            <!--<v-icon right small> close</v-icon>-->
+        <!--</v-btn>-->
 
 </template>
 
@@ -113,18 +108,23 @@
             }
         }, created() {
             const array = [];
+
             for (let vraag in this.$store.state.configuredSurvey) {
+                console.log('WA');
                 array.push({"questionNr": vraag, choices: []});
             }
+
             this.filterVModel = array;
         }
     }
 </script>
 
-<style>
-    .menuButton {
-        width: 100%;
-    }
+<style scoped>
+        .filterbutton {
+            background-color: #00bfa5;
+            border-color:   #00bfa5;
+        }
+
     .selectievakje{
         padding: 0 !important;
         margin-top: 0 !important;

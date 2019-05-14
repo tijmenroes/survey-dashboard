@@ -1,29 +1,58 @@
 <template>
-    <v-container >
-    <div v-if="$store.state.filterActive === false" >
-    <div class="headline">Product survey</div>
+    <div >
 
-    <v-divider class="pa-1"></v-divider>
+       <div class="menu">
 
-    <span class="grey--text">Made on: 13-06-2018</span> <br>
-    <span class="grey--text">Last seen: 20-06-2018</span> <br>
-    <span class="grey--text">Status: Open </span>
+<div class="leftButtons">
+        <ul>
+            <li>
+                <DataFilter></DataFilter>
+            </li>
+            <li>
+                <ExportComponent :toPrint="toPrint"></ExportComponent>
+            </li>
+        </ul>
 
-    <v-divider class="pa-1"></v-divider>
-    <v-btn dark round class="menuButton text-none" color="#475963" @click="restorePage"> Herstel pagina</v-btn>
-    <ExportComponent :toPrint="toPrint"></ExportComponent>
-    <div class="headline">Filters</div>
-    <v-divider></v-divider>
-        <DataFilter></DataFilter>
-    </div>
-        <div v-else>
-            <h3>Filter Aanpassen</h3>
-            <DataFilter></DataFilter>
+
+</div>
+        <div class="rightButtons">
+            <ul>
+                <li>
+                    <div class="menuButton " @click=""> Terug</div>
+                </li>
+                <li>
+                    <div class="menuButton " @click="restorePage"> Herstel pagina</div>
+
+                </li>
+                <li>
+
+                    <v-menu offset-y >
+                        <template v-slot:activator="{ on }">
+                            <div
+                                    class="menuButton selectButton"
+                                    v-on="on"
+                            >
+                                Dashboard
+                            </div>
+                        </template>
+
+                        <v-list>
+                            <v-list-tile @click="">
+                                <v-list-tile-title >Dashboard</v-list-tile-title>
+                            </v-list-tile>
+                            <v-list-tile @click="">
+                                <v-list-tile-title>List</v-list-tile-title>
+                            </v-list-tile>
+                        </v-list>
+                    </v-menu>
+                </li>
+            </ul>
+
         </div>
-    <!--<export-component :toPrint="$refs" :vragen="vragen"></export-component>-->
 
+        </div>
 
-        </v-container>
+    </div>
 </template>
 
 <script>
@@ -46,6 +75,55 @@
     }
 </script>
 
-<style scoped>
+<style>
+    .menu ul {
+        min-height: 10%;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        /*float: left;*/
+    }
+    .menu ul li {
+        /*display: inline-block;*/
+        /*float: left;*/
+        margin-right: 10px;
+        margin-bottom: 10px;
 
+    }
+    .menuButton {
+        /*display:block;*/
+        /*width: 100%;*/
+        background: #455a64;
+        font-size: 14px;
+        display: block;
+        color:white;
+        border: 2px solid #455a64;
+        padding: 10px 30px;
+        border-radius: 22px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+
+    }
+    .leftButtons .menuButton {
+        float:left;
+    }
+    .rightButtons .menuButton{
+        float:right;
+    }
+    .selectButton {
+        color: black;
+        background:white;
+        padding: 12px 20px;
+        border-radius: 22px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        border: solid 2px #dadada;
+    }
+
+    .menu {
+        margin-bottom: 30px;
+        min-height: 90px;
+        padding: 0;
+
+    }
 </style>

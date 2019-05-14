@@ -7,17 +7,25 @@ import {store} from './store/store';
 //import VueAnalytics from 'vue-analytics'
 Vue.use(VueHtml2Canvas);
 Vue.use(babelPolyfill);
-// Vue.use(VueAnalytics, {
-//   id: 'UA-139626788-1',
-//   checkDuplicatedScript: true
-// });
+
 Vue.config.productionTip = true
 
 new Vue({
   el: '#app',
   store,
-  render: h => h(App, {
-    props:{},
-  }),
+  data(){
+    return{
+      source: null
+    }
+  },
+  beforeMount(){
+    this.source = this.$el.attributes['source'].value;
+
+  },
+  components:{App},
+  template: '<App :source="source"/>',
+  // render: h => h(App, {
+  //   props:{},
+  // }), //Render normally
 
 })

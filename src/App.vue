@@ -1,61 +1,60 @@
 <template>
   <v-app class="app">
     <v-content>
+        <div id="crumbpath" class="clear">
 
-
-        <div class="pageButtons">
-            <span v-for="(button,index) in buttons"> <v-btn class="Vuebutton text-none" @click="pageNumber = index" flat depressed>{{button}}</v-btn> </span>
+            <h2>Formulieren</h2>
+            <div class="pageButtons">
+                 <v-btn class="Vuebutton text-none" v-for="(button,index) in buttons" @click="pageNumber = index" flat depressed>{{button}}</v-btn>
+            </div>
         </div>
 
-        <v-dialog
-                v-model="$store.state.loading"
+        <!--<v-dialog-->
+                <!--v-model="$store.state.loading"-->
+                <!--persistent-->
+                <!--width="300"-->
+        <!--&gt;-->
+            <!--<v-card-->
+                    <!--color="primary"-->
+                    <!--dark-->
+            <!--&gt;-->
+                <!--<v-card-text>-->
+                    <!--Loading-->
+                    <!--<v-progress-linear-->
+                            <!--indeterminate-->
+                            <!--color="white"-->
+                            <!--class="mb-0"-->
+                    <!--&gt;</v-progress-linear>-->
+                <!--</v-card-text>-->
+            <!--</v-card>-->
+        <!--</v-dialog>-->
 
-                persistent
-                width="300"
-        >
-            <v-card
-                    color="primary"
-                    dark
-            >
-                <v-card-text>
-                    Loading
-                    <v-progress-linear
-                            indeterminate
-                            color="white"
-                            class="mb-0"
-                    ></v-progress-linear>
-                </v-card-text>
-            </v-card>
-        </v-dialog>
+    <div id="dashboard">
+    <MenuComponent :toPrint="$refs" v-if="$store.state.configuredSurvey.length > 0"></MenuComponent>
+
+    <FilterBox></FilterBox>
 
 
-
-        <div style="height: 100px"></div>
-
-<v-layout v-if="$store.state.configuredSurvey.length > 0">
+<div v-if="$store.state.configuredSurvey.length > 0">
 
       <keep-alive>
-          <v-flex md10 sm12 ref="printMe" v-if="pageNumber === 2">
-      <Overview ref="overview"></Overview>
-          </v-flex>
+
+      <Overview ref="printMe" v-if="pageNumber === 2"></Overview>
+
       <Individual v-else-if="pageNumber === 1"></Individual>
 
         <div v-else-if="pageNumber === 0">
         <SurveyView></SurveyView>
         </div>
-          <GAView v-else></GAView>
+
       </keep-alive>
 
-          <v-flex md2 sm12 v-if="pageNumber === 2">
+</div>
+    <v-layout v-else>
+        Oeps hier gaat iets fout!
+    </v-layout>
 
-            <v-card class="menu">
-
-                <MenuComponent :toPrint="$refs" ></MenuComponent>
-
-          </v-card>
-            </v-flex>
-</v-layout>
-
+    </div>
     </v-content>
   </v-app>
 </template>
@@ -65,17 +64,16 @@
 import Overview from "./views/Overview.vue";
 import SurveyView from "./views/SurveyView.vue";
 import MenuComponent from './components/MenuComponent.vue'
-import GAView from './components/GAnalytics.vue'
+import FilterBox from './components/FilterBox.vue'
 import axios from 'axios'
 
 export default {
   name: 'App',
   props: ['source'],
   components: {
-    Overview, SurveyView,
+    Overview, SurveyView, FilterBox,
     Individual: () => import('./views/Individual.vue'),
-      GAView,
-      MenuComponent
+       MenuComponent
   },
 
   data () {
@@ -90,7 +88,7 @@ export default {
       supertof: null,
       data: [],
 
-      buttons: ["Statistics", "Individual", "Overview", "Google Analytics"],
+      buttons: ["Statistics", "Individual", "Overview"],
 
     }
   },methods:{
@@ -162,26 +160,33 @@ export default {
         }
     },
   created(){
-
+      console.log(this.source);
       this.logSurvey(24103);
+
+    },
+    mounted(){
 
     }
 }
 </script>
 
 <style scoped>
-  .pageButtons {
-    width: 100%;
-    float: right;
-  }
+    #dashboard {
+        padding: 20px;
+        position: relative;
+    }
+    #crumbpath {
+
+        background: #f7f7f7;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e3e8e9;
+        border-bottom: 1px solid #cecece;
+    }
+
   .Vuebutton {
-    float:right;
+    /*float:right;*/
   }
-  .menu {
-      margin-top: 5%;
-      position: fixed;
-      width: 15%;
-  }
+
   .app {
     background: white;
   }

@@ -14,6 +14,7 @@ export const store = new Vuex.Store({
         reset: 0,
         filters: [],
         loading: false,
+        showFilterMenu: true,
     }, mutations: {
         setUserData(state, users){
             state.surveyAnswers  = users;

@@ -3,18 +3,15 @@
 
         <v-menu offset-y>
             <template v-slot:activator="{ on }">
-                <v-btn
+                <div
                         color="#38C1A7"
-                        dark
-                        round
-
                         class="menuButton text-none"
                         v-on="on"
-                        :loading="loading"
+
                 >
-                    Export as
-                    <v-icon right dark>keyboard_arrow_down</v-icon>
-                </v-btn>
+                    Exporteer pagina
+
+                </div>
 
             </template>
             <v-list>
