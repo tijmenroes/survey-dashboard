@@ -1,12 +1,20 @@
 <template>
-    <div >
+
+<v-container fluid grid-list-sm style="padding: 0;">
+
+
+
 
        <div class="menu">
+           <v-layout row wrap>
+<v-flex align-self-baseline>
+<!--Toch wel per ding een flex???!?!-->
 
 <div class="leftButtons">
         <ul>
             <li>
-                <DataFilter></DataFilter>
+                <!--<DataFilter></DataFilter>-->
+                <div class="menuButton filterButton" @click="lmaotest"> Nieuwe filter</div>
             </li>
             <li>
                 <ExportComponent :toPrint="toPrint"></ExportComponent>
@@ -15,10 +23,14 @@
 
 
 </div>
+</v-flex>
+
+           <v-flex>
+
         <div class="rightButtons">
             <ul>
                 <li>
-                    <div class="menuButton " @click=""> Terug</div>
+                    <div class="menuButton " @click="sluitbox"> Terug</div>
                 </li>
                 <li>
                     <div class="menuButton " @click="restorePage"> Herstel pagina</div>
@@ -29,7 +41,7 @@
                     <v-menu offset-y >
                         <template v-slot:activator="{ on }">
                             <div
-                                    class="menuButton selectButton"
+                                    class="selectButton"
                                     v-on="on"
                             >
                                 Dashboard
@@ -37,10 +49,10 @@
                         </template>
 
                         <v-list>
-                            <v-list-tile @click="">
+                            <v-list-tile @click="emitDash">
                                 <v-list-tile-title >Dashboard</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile @click="">
+                            <v-list-tile @click="emitList">
                                 <v-list-tile-title>List</v-list-tile-title>
                             </v-list-tile>
                         </v-list>
@@ -49,33 +61,59 @@
             </ul>
 
         </div>
+               </v-flex>
+           </v-layout>
 
         </div>
+</v-container>
 
-    </div>
 </template>
 
 <script>
-    import DataFilter from './Filter.vue'
+
     import ExportComponent from './ExportComponent.vue'
 
     export default {
         name: "MenuComponent",
         props: ['toPrint'],
         components: {
-            DataFilter, ExportComponent
+          ExportComponent
         },
         methods:{
             restorePage(){
                 this.$store.commit('resetData');
                 this.$store.commit('ConfigureAnswers');
                 //this.$emit('resetPage');
+            },
+            lmaotest(){
+                this.$store.state.filterActive = true;
+            },
+            sluitbox(){
+                this.$store.state.filterActive = false;
+            },
+            emitDash(){
+                this.$emit('toDash');
+            },
+            emitList(){
+                this.$emit('toList');
             }
         }
     }
 </script>
 
 <style>
+    .filterButton {
+        background: #00bfa5 !important;
+        border: 2px solid #00bfa5 !important;
+    }
+    .filterButton:hover {
+        background: #009688 !important;
+        border: 2px solid #009688 !important;
+    }
+    .menuButton:hover {
+        background: #37474f;
+        border: 2px solid #37474f;
+    }
     .menu ul {
         min-height: 10%;
         margin: 0;
@@ -84,13 +122,20 @@
         /*float: left;*/
     }
     .menu ul li {
-        /*display: inline-block;*/
-        /*float: left;*/
+
+        font-weight: 600;
         margin-right: 10px;
         margin-bottom: 10px;
-
+        min-height: 50px;
+        display: inline-block;
+    }
+    .menu .rightButtons li {
+  float:right;
     }
     .menuButton {
+        cursor: pointer;
+        -webkit-transition: all .2s ease-out;
+        transition: all .2s ease-out;
         /*display:block;*/
         /*width: 100%;*/
         background: #455a64;
@@ -104,13 +149,17 @@
         margin-bottom: 10px;
 
     }
-    .leftButtons .menuButton {
+    .leftButtons  {
         float:left;
     }
-    .rightButtons .menuButton{
+    .rightButtons {
         float:right;
     }
+    .rightButtons .menuButton {
+        float: left;
+    }
     .selectButton {
+        font-weight: 400;
         color: black;
         background:white;
         padding: 12px 20px;
@@ -121,8 +170,8 @@
     }
 
     .menu {
-        margin-bottom: 30px;
-        min-height: 90px;
+        /*margin-bottom: 30px;*/
+        min-height: 75px;
         padding: 0;
 
     }

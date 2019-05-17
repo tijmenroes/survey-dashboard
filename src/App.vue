@@ -9,30 +9,30 @@
             </div>
         </div>
 
-        <!--<v-dialog-->
-                <!--v-model="$store.state.loading"-->
-                <!--persistent-->
-                <!--width="300"-->
-        <!--&gt;-->
-            <!--<v-card-->
-                    <!--color="primary"-->
-                    <!--dark-->
-            <!--&gt;-->
-                <!--<v-card-text>-->
-                    <!--Loading-->
-                    <!--<v-progress-linear-->
-                            <!--indeterminate-->
-                            <!--color="white"-->
-                            <!--class="mb-0"-->
-                    <!--&gt;</v-progress-linear>-->
-                <!--</v-card-text>-->
-            <!--</v-card>-->
-        <!--</v-dialog>-->
+        <v-dialog
+                v-model="$store.state.loading"
+                persistent
+                width="300"
+        >
+            <v-card
+                    color="primary"
+                    dark
+            >
+                <v-card-text>
+                    Loading
+                    <v-progress-linear
+                            indeterminate
+                            color="white"
+                            class="mb-0"
+                    ></v-progress-linear>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
 
     <div id="dashboard">
-    <MenuComponent :toPrint="$refs" v-if="$store.state.configuredSurvey.length > 0"></MenuComponent>
+    <!--<MenuComponent :toPrint="$refs" v-if="$store.state.configuredSurvey.length > 0"></MenuComponent>-->
 
-    <FilterBox></FilterBox>
+    <!--<FilterBox></FilterBox>-->
 
 
 <div v-if="$store.state.configuredSurvey.length > 0">
@@ -63,17 +63,18 @@
 
 import Overview from "./views/Overview.vue";
 import SurveyView from "./views/SurveyView.vue";
-import MenuComponent from './components/MenuComponent.vue'
-import FilterBox from './components/FilterBox.vue'
+
+// import FilterBox from './components/FilterBox.vue'
 import axios from 'axios'
 
 export default {
   name: 'App',
   props: ['source'],
   components: {
-    Overview, SurveyView, FilterBox,
+    Overview, SurveyView,
+      //FilterBox,
     Individual: () => import('./views/Individual.vue'),
-       MenuComponent
+      // MenuComponent
   },
 
   data () {
@@ -161,7 +162,7 @@ export default {
     },
   created(){
       console.log(this.source);
-      this.logSurvey(24103);
+      this.logSurvey(24000);
 
     },
     mounted(){
@@ -171,9 +172,11 @@ export default {
 </script>
 
 <style scoped>
+
     #dashboard {
         padding: 20px;
         position: relative;
+        font-family: 'Open Sans' , sans-serif;
     }
     #crumbpath {
 

@@ -1,22 +1,55 @@
 <template>
     <div>
-        Film Survey
+
+        <MenuIndividual></MenuIndividual>
+        <!--<searchBox></searchBox>-->
+        <v-expand-transition >
+            <div class="boxContainer" v-show="$store.state.searchActive">
+                <v-container fluid class="boxContent">
+                    <dl class="inputje">
+                        <v-layout row wrap grow>
+                            <v-flex shrink>
+                                <v-text-field
+                                        v-model="search"
+                                        append-icon="search"
+                                        label="Zoeken"
+                                        single-line
+                                        hide-details
+                                        class="choiceMenu"
+                                        box
+                                        dense
+                                        background-color="#fff"
+
+                                ></v-text-field>
+                            </v-flex>
+
+                            <v-flex shrink >
+                                <div class="menuButton " @click="$store.state.searchActive = false"> Terug</div>
+
+                            </v-flex>
+
+                        </v-layout>
+
+
+
+                    </dl>
+
+                </v-container>
+
+            </div>
+        </v-expand-transition>
         <v-spacer></v-spacer>
-        <v-text-field
-                v-model="search"
-                append-icon="search"
-                label="Zoeken"
-                single-line
-                hide-details
-                color="#455A64"
-        ></v-text-field>
-        <v-container fluid grid-list-xs>
+
+        <v-container fluid grid-list-xs style="padding: 0 !important;">
             <v-layout wrap>
+<v-flex xs12>
+
 
                     <v-card>
                                   <v-data-table
                                 v-model="selected"
                                 :headers="headers"
+                                no-results-text="Voor deze zoekopdracht zijn geen reacties gevonden"
                                 :items="rows"
                                 item-key="id"
                                 select-all
@@ -39,6 +72,8 @@
                             </template>
 
                             <template slot="items" slot-scope="props">
+
+
                                 <td >
                                     <v-checkbox
                                             v-model="props.selected"
@@ -47,17 +82,14 @@
                                             color="#455A64"
                                     ></v-checkbox>
                                 </td>
-                                <td v-for="header in headers" :key="props.item[header]" @click="openDialog(props.item)" >
+                                <td v-for="header in headers" :key="props.item[header]" @click="openDialog(props.item)" class="litty">
                                     {{props.item[header.value]}}
                                 </td>
 
                             </template>
-                            <v-alert v-slot:no-results :value="true" color="error" icon="warning">
-                                Your search for "{{ search }}" found no results.
-                            </v-alert>
                         </v-data-table>
                     </v-card>
-
+</v-flex>
             </v-layout>
             <br>
             <v-btn @click="jsonConvert">Export to Excel</v-btn>
@@ -79,19 +111,26 @@
     </div>
 </template>
 <script>
+    import MenuIndividual from '../components/MenuIndividual.vue'
+    import searchBox from '../components/FilterBoxIndiv.vue'
     export default {
         created() {
             this.configureHeaders();
             this.configureRows();
         },
+        components:{
+            MenuIndividual,
+            searchBox
+        },
         data() {
             return {
+
                 dialog: false,
                 dialogText: '',
                 pagination: {
                     descending: true,
                     rowsPerPage: 10,
-                    //totalItems: 69,
+
                     sortBy: "id",
                     page: 1,
                 },
@@ -248,8 +287,52 @@
 </script>
 
 <style scoped>
-
+ .litty:hover{
+     /*background-color:blue!important;;*/
+ }
 table.v-table tbody tr:nth-child(even) td {
-   background-color: #fafafa;
+   background: #fafafa;
+}
+table.v-table tbody tr:hover{
+    background-color: black !important;
+}
+
+
+.choiceMenu {
+    width: 250px;
+    margin: 0;
+    padding: 0px 20px;
+    position: relative;
+}
+
+.boxContent {
+    padding: 0;
+    margin: 0 auto;
+    text-align: left;
+}
+.boxContainer {
+    min-height: 20px;
+    padding: 19px;
+    position: relative;
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+
+    margin-bottom: 30px;
+}
+
+form {
+    width: 100%;
+
+}
+.keuzeButton{
+    background: #fff;
+    border: 1px solid #dfdfdf;
+    border-radius: 6px;
+    padding: 4px;
+    min-height: 40px;
+    color: #3e3e3e;
 }
 </style>

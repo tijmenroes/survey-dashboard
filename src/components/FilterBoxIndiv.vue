@@ -1,26 +1,42 @@
 <template>
-        <v-menu offset-y v-if="showMenu">
-
-        </v-menu>
+    <div>
 
 
 
+    </div>
 
 </template>
 
 <script>
-
     export default {
-
-        data() {
+        name: "FilterBox",
+        watch:{
+          model(){
+              console.log('da minde nie');
+              for(let vraag in this.$store.state.configuredSurvey){
+                  if(this.$store.state.configuredSurvey[vraag].Title === this.model){
+                   this.filterStatus = vraag;
+                   this.model= [];
+                   this.showMenu = false;
+                  }
+              }
+          }
+        },
+        data(){
             return {
                 showMenu: true,
+                bar: false,
+                searchItems: [],
                 filterStatus: 0,
                 selectedChoice: [],
                 filterVModel: [],
+                model: ["hai"],
             }
         },
         methods: {
+            testje(input){
+              console.log(input);
+            },
             selectItem(index) {
                 this.showMenu = false;
                 this.$store.state.filterActive = true;
@@ -72,11 +88,14 @@
             }
         }, created() {
             const array = [];
+            const array2 = [];
 
             for (let vraag in this.$store.state.configuredSurvey) {
-                console.log('WA');
+
                 array.push({"questionNr": vraag, choices: []});
+                array2.push(this.$store.state.configuredSurvey[vraag].Title)
             }
+            this.searchItems = array2;
 
             this.filterVModel = array;
         }
@@ -84,10 +103,51 @@
 </script>
 
 <style scoped>
-        .filterbutton {
-            background-color: #00bfa5;
-            border-color:   #00bfa5;
-        }
+    .autocomplete {
+        border: 1px solid #dfdfdf;
+        border-radius: 6px;
+        padding: 4px;
+        min-height: 40px;
+        color: #3e3e3e;
+    }
+    .choiceMenu {
+        width: 250px;
+        margin: 0;
+        padding: 0px 20px;
+        position: relative;
+    }
+    .selectievakje{
+        padding: 0 !important;
+        margin-top: 0 !important;
+    }
+    .boxContent {
+        padding: 0;
+        margin: 0 auto;
+        text-align: left;
+    }
+    .boxContainer {
+        min-height: 20px;
+        padding: 19px;
+        position: relative;
+        background-color: #f5f5f5;
+        border: 1px solid #e3e3e3;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
 
+        margin-bottom: 30px;
+    }
 
+    form {
+        width: 100%;
+
+    }
+    .keuzeButton{
+        background: #fff;
+        border: 1px solid #dfdfdf;
+        border-radius: 6px;
+        padding: 4px;
+        min-height: 40px;
+        color: #3e3e3e;
+    }
 </style>

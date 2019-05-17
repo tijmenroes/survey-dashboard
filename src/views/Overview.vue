@@ -1,15 +1,17 @@
 <template>
     <div>
           <div>
+              <MenuComponent @toList="listview" @toDash="dashboardview" :toPrint="$refs"></MenuComponent>
+              <FilterBox></FilterBox>
 
-            <v-container fluid grid-list-xs>
-                Weergave: <v-btn @click="dashboardview"> Dash</v-btn> <v-btn @click="listview"> List</v-btn>
-                <v-layout ref="printMe" row style="background-color: white" wrap>
-                    <v-flex :key="i" :lg12="chart.isList" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" md6 pa-3 v-for="(chart,i) in pieArray.charts"
-                            xs12>
+              <FilterList></FilterList>
+            <v-container fluid grid-list-xs style="padding: 0 !important">
+
+                <v-layout ref="printMe" row style="background-color: white" wrap v-bind="checkViewWidth">
+                    <v-flex :key="i" :lg12="chart.isList" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" md6 :pl-3="!phoneDetected" :pr-3="!phoneDetected" pb-3 v-for="(chart,i) in chartArray.charts"
+                            >
                         <v-expansion-panel
                                 expand
-
                                 v-model="panel[i]"
                         >
                             <v-expansion-panel-content>
@@ -19,27 +21,39 @@
                                     </div>
                                 </template>
                                 <div class="cardContent" v-if="chart.zerovalues === false">
-                                        <v-container>
+                                    <div v-if="chart.chartType > 0">
+
+
+                                        <v-container v-if="chart.menuShow === false">
                                             Antwoorden: {{reactiveData[i].SumAnswers}}
+                                            <div style="float: right">
+                                                <!--<div class="chartbutton" >-->
+                                                    <!--Exporteren-->
+                                                <!--</div>-->
+                                                <div class="chartbutton" @click="chart.menuShow = true">
+                                                    Aanpassen
+                                                </div>
+                                            </div>
                                         </v-container>
                                     <div>
 
-                                    <span v-for="(button,index) in buttons">
-                                                <v-btn @click="chart.menuNumber = index" depressed flat>
-                                                    <span @click="chart.menuShow =! chart.menuShow "
-                                                          style="color:red" v-if="chart.menuNumber === index">
-                                                    {{button}}
-                                                     <v-icon small>keyboard_arrow_down</v-icon></span>
-                                                    <span v-else-if="chart.menuNumber !== index"> {{button}}
-                                                        <v-icon small>keyboard_arrow_up</v-icon></span>
-                                                </v-btn>
-                                    </span>
 
-                                        <div class="uitschuifDiv">
+                                        <div>
                                             <v-expand-transition>
-                                                <div v-show="chart.menuShow">
-                                                    <div v-if="chart.menuNumber === 0">
-                                                        <v-layout row wrap>
+                                                <div v-show="chart.menuShow" class="editContainer">
+                                                    <span v-for="(button,index) in buttons" @click="chart.menuNumber = index" class="optionsTabs ">
+
+                                                    <span
+                                                        class="tabActive normaltab" v-if="chart.menuNumber === index">
+                                                    {{button}}
+                                                    </span>
+                                                    <span class="normaltab" v-else-if="chart.menuNumber !== index"> {{button}}
+                                                    </span>
+
+                                                    </span>
+
+                                                    <div class="uitschuifDiv">
+                                                        <v-layout row wrap v-if="chart.menuNumber === 0">
                                                             <v-flex lg2 md4 v-for="(option, optionIndex) in options"
                                                                     xs3>
                                                                 <v-tooltip bottom>
@@ -59,34 +73,55 @@
                                                             </v-flex>
                                                         </v-layout>
 
-                                                        <v-btn @click="chart.menuShow =! chart.menuShow" class="text-none" color="#475A64" dark
-                                                               small>Ga Terug
-                                                        </v-btn>
-                                                    </div>
-                                                    <div v-else>
-                                                        <v-layout row wrap>
 
-                                                            <v-radio-group @change="displayHandler(chart.radioGroup, i)"
-                                                                           v-model="chart.radioGroup">
-                                                                <v-radio :value="0" color="#455A64" label="Geen Cijfers"></v-radio>
-                                                                <v-radio :value="1" color="#455A64"  label="Absolute Cijfers"></v-radio>
-                                                                <v-radio :value="2" color="#455A64"  label="Percentage"
-                                                                         v-if="chart.chartType > 2"></v-radio>
-                                                            </v-radio-group>
+                                                    <div v-else class="uitschuifDiv">
+                                                        <v-layout row wrap class="optionContent" >
+                                                            <v-flex xs6>
+                                                                Labels
+                                                                <v-radio-group @change="displayHandler(chart.radioGroup, i)"
+                                                                               v-model="chart.radioGroup" style="margin-top: 0 !important;">
+                                                                    <v-radio small :value="0" color="#455A64" label="Geen Cijfers"></v-radio>
+                                                                    <v-radio :value="1" color="#455A64"  label="Absolute Cijfers"></v-radio>
+                                                                    <v-radio :value="2" color="#455A64"  label="Percentages"
+                                                                             v-if="chart.chartType > 2"></v-radio>
+                                                                    <v-radio :value="2" color="#455A64"  label="Percentages"
+                                                                             v-else disabled></v-radio>
+                                                                </v-radio-group>
+                                                            </v-flex>
 
-                                                            <v-checkbox v-model="chart.mediumShow" color="#455A64" v-if="chart.chartType < 3" label="Gemiddelde" @change="AddMiddleLine(i)"></v-checkbox>
+                                                                <v-flex xs6>
+                                                                    Weergeven
+                                                                    <v-checkbox style="margin-top: 0 !important;"
+                                                                            v-model="chart.mediumShow" color="#455A64" v-if="chart.chartType < 3" label="Gemiddelde" @change="AddMiddleLine(i)"></v-checkbox>
+                                                                    <v-checkbox style="margin-top: 0 !important;"
+                                                                                v-model="chart.mediumShow" color="#455A64" v-else label="Gemiddelde" disabled></v-checkbox>
+                                                                </v-flex>
+
+
                                                         </v-layout>
+                                                    </div>
+
                                                         <v-btn @click="chart.menuShow =! chart.menuShow" class="text-none" color="#475A64" dark
                                                                small>Ga Terug
                                                         </v-btn>
-                                                    </div>
+                                                </div>
                                                 </div>
                                             </v-expand-transition>
                                         </div>
                                     </div>
                                     <v-chart
-                                            :options="pieArray.charts[i]" autoresize
+                                            :options="chartArray.charts[i]" autoresize
                                             class="bigboy"></v-chart>
+                                    </div>
+                                    <div v-else>
+
+                                           <ul>
+                                               <li v-for="data in chart.answers">
+                                                   {{data}}
+                                               </li>
+                                           </ul>
+
+                                    </div>
                                 </div>
                                 <div class="cardContent" v-else>
                                     <v-container justify-space-around>
@@ -113,19 +148,24 @@
     import 'echarts/lib/component/toolbox'
     import 'echarts/lib/component/legend'
     import 'echarts/lib/component/markLine'
-
+    import FilterBox from '../components/FilterBox.vue'
+    import MenuComponent from '../components/MenuComponent.vue'
+    import FilterList from '../components/FilterList.vue'
 
 
     export default {
 
         name: 'Overview',
         components: {
-
+            FilterBox,
+            MenuComponent,
+            FilterList,
             'v-chart': ECharts,
         },
 
         data() {
             return {
+                phoneDetected: false,
                 options: [{"icon": "show_chart", "text": "Lijngrafiek"}, {
                     "icon": "bar_chart",
                     "text": "Staafgrafiek"
@@ -143,7 +183,7 @@
                 }
                 ],
                 buttons: ["Grafiektype", "Weergave"],
-                pieArray: {
+                chartArray: {
                     charts: []
                 },
                 panel: [],
@@ -154,40 +194,40 @@
         },
         methods: {
             listview(){
-              for(let key in this.pieArray.charts){
-                  this.pieArray.charts[key].isList = true;
+              for(let key in this.chartArray.charts){
+                  this.chartArray.charts[key].isList = true;
                  }
               },
                 dashboardview(){
-                    for(let key in this.pieArray.charts){
-                        this.pieArray.charts[key].isList = false;
+                    for(let key in this.chartArray.charts){
+                        this.chartArray.charts[key].isList = false;
                     }
                 },
             AddMiddleLine(index){
 
 
-                if(this.pieArray.charts[index].mediumShow){
-                    this.pieArray.charts[index].series[0].markLine.data = [{"type": "average"}]
+                if(this.chartArray.charts[index].mediumShow){
+                    this.chartArray.charts[index].series[0].markLine.data = [{"type": "average"}]
                 } else {
-                    this.pieArray.charts[index].series[0].markLine.data = null
+                    this.chartArray.charts[index].series[0].markLine.data = null
                 }
             },
             displayHandler(nummer, index) {
 
                 if (nummer === 0) {
-                    this.pieArray.charts[index].series[0].label.show = false;
+                    this.chartArray.charts[index].series[0].label.show = false;
                 } else if (nummer === 1) {
-                    this.pieArray.charts[index].series[0].label.show = true;
-                    this.pieArray.charts[index].series[0].label.formatter = '{c}'
+                    this.chartArray.charts[index].series[0].label.show = true;
+                    this.chartArray.charts[index].series[0].label.formatter = '{c}'
                 } else if (nummer === 2) {
-                    this.pieArray.charts[index].series[0].label.show = true;
-                    this.pieArray.charts[index].series[0].label.formatter = '{d}%'
+                    this.chartArray.charts[index].series[0].label.show = true;
+                    this.chartArray.charts[index].series[0].label.formatter = '{d}%'
                 }
             },
 
             toLine(graph, option) {
 
-                const grafiek = this.pieArray.charts[graph];
+                const grafiek = this.chartArray.charts[graph];
                 this.AddMiddleLine(graph);
                 //Reset Graph
 
@@ -237,8 +277,8 @@
             },
 
             drawCharts() {
-                for (let chart in this.pieArray.charts) {
-                    this.pieArray.charts[chart].series[0].data = this.reactiveData[chart].questionAnswers;
+                for (let chart in this.chartArray.charts) {
+                    this.chartArray.charts[chart].series[0].data = this.reactiveData[chart].questionAnswers;
 
                     let allowed = 0;
                     for(let optie in this.reactiveData[chart].questionAnswers){
@@ -249,103 +289,133 @@
                     }
 
                     if(allowed === 0){
-                        this.pieArray.charts[chart].zerovalues = true;
+                        this.chartArray.charts[chart].zerovalues = true;
                     } else{
-                        this.pieArray.charts[chart].zerovalues = false
+                        this.chartArray.charts[chart].zerovalues = false
                     }
                 }
             },
             initOverview(){
-                this.pieArray = {
+                this.chartArray = {
                     charts: []
                 };
-                console.log(this.reactiveData);
+               // console.log(this.reactiveData);
                 for (let key in this.reactiveData) {
-                    let allowed = 0;
+                    if(this.reactiveData[key].Type === 5){
+                        console.log('wowzers');
+                        let answerArray = [];
+                        for(let answer in this.reactiveData[key].questionAnswers){
+                            if (this.reactiveData[key].questionAnswers[answer] != null) {
 
-                    for (let optie in this.reactiveData[key].questionAnswers) {
+                                answerArray.push(this.reactiveData[key].questionAnswers[answer]);
+                            }
 
-                        if(this.reactiveData[key].questionAnswers[optie].value != null) {
-
-                            allowed++;
-                            break;
                         }
-                    }
-                    if (allowed > 0) {
-                        const chart ={
+                    //    this.chartArray.charts.push(answers)
+                        const chart = {
                             bigDiv: false,
                             isList: false,
                             zerovalues: false,
-                            menuShow: true,
+                            menuShow: false,
                             mediumShow: false,
                             menuNumber: 1,
                             radioGroup: 2,
-                            chartType: 3,
-                            legend: {},
-                            tooltip: {},
-                            xAxis: {
-                                show: false,
-                                data: this.reactiveData[key].questionChoices
-                            },
-                            yAxis: {show: false},
-                            series: [{
-                                type: 'pie',
-                                radius: ['45%', '75%'],
-                                color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
-                                data: this.reactiveData[key].questionAnswers,
-                                itemStyle: {
-                                    borderColor: 'white',
-                                    borderWidth: 2.3,
-                                },
-                                label: {
-                                    // show: true,
-                                    formatter: '{d}%',
-                                    position: 'inside'
-                                },
-                                // color: "#3a84dd",
-                                smooth: true,
-                                symbolSize: 6,
-                                lineStyle: {
-                                    width: 3.5
-                                },
-                                areaStyle: {
-                                    opacity: 0.4
-                                },
-                                markLine: {
-                                    show: false,
-                                    silent: true,
-                                    symbolSize: 0,
-                                    data: null
-                                }
-                            }]
-
+                            chartType: 0,
+                            answers: answerArray
                         };
-                        if(this.reactiveData[key].Type > 0 ){
-                            const grafiek = chart;
-                            grafiek.chartType = 1;
+                        console.log(chart.answers);
+                        this.chartArray.charts.push(chart)
+                    }
+                    else {
 
-                            grafiek.yAxis.show = true;
-                            grafiek.xAxis.show = true;
-                            grafiek.series[0].type = 'bar';
-                            grafiek.series[0].itemStyle.borderWidth = 0;
-                            if(this.reactiveData[key].Type > 1){
-                                grafiek.bigDiv = true;
+
+                        let allowed = 0;
+
+                        for (let optie in this.reactiveData[key].questionAnswers) {
+
+                            if (this.reactiveData[key].questionAnswers[optie].value != null) {
+
+                                allowed++;
+                                break;
                             }
                         }
-                        this.pieArray.charts.push(chart)
-                    } else {
-                        console.log('zero values fam');
-                        this.pieArray.charts.push({zerovalues: true})
+                        if (allowed > 0) {
+                            const chart = {
+                                bigDiv: false,
+                                isList: false,
+                                zerovalues: false,
+                                menuShow: false,
+                                mediumShow: false,
+                                menuNumber: 1,
+                                radioGroup: 2,
+                                chartType: 3,
+                                legend: {},
+                                tooltip: {},
+                                xAxis: {
+                                    show: false,
+                                    data: this.reactiveData[key].questionChoices
+                                },
+                                yAxis: {show: false},
+                                series: [{
+                                    type: 'pie',
+                                    radius: ['45%', '75%'],
+                                    color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
+                                    data: this.reactiveData[key].questionAnswers,
+                                    itemStyle: {
+                                        borderColor: 'white',
+                                        borderWidth: 2.3,
+                                    },
+                                    label: {
+                                        // show: true,
+                                        formatter: '{d}%',
+                                        position: 'inside'
+                                    },
+                                    // color: "#3a84dd",
+                                    smooth: true,
+                                    symbolSize: 6,
+                                    lineStyle: {
+                                        width: 3.5
+                                    },
+                                    areaStyle: {
+                                        opacity: 0.4
+                                    },
+                                    markLine: {
+                                        show: false,
+                                        silent: true,
+                                        symbolSize: 0,
+                                        data: null
+                                    }
+                                }]
+
+                            };
+                            if (this.reactiveData[key].Type > 0) {
+                                const grafiek = chart;
+                                grafiek.chartType = 1;
+
+                                grafiek.yAxis.show = true;
+                                grafiek.xAxis.show = true;
+                                grafiek.series[0].type = 'bar';
+                                grafiek.series[0].itemStyle.borderWidth = 0;
+                                if (this.reactiveData[key].Type > 1) {
+                                    grafiek.bigDiv = true;
+                                }
+                            }
+                            this.chartArray.charts.push(chart)
+                        } else {
+                            console.log('zero values fam');
+                            this.chartArray.charts.push({zerovalues: true})
+                        }
+
                     }
                 }
+
                 const tempPanel = [];
-                for (let key in this.pieArray.charts) {
+                for (let key in this.chartArray.charts) {
                     tempPanel.push(0)
                 }
                 this.panel = tempPanel;
             }
         },created() {
-
 
             this.initOverview();
             this.$store.watch(this.$store.getters.getData, configuredSurvey => {
@@ -356,11 +426,67 @@
             this.$store.watch(this.$store.getters.getReset, reset => {
                     this.initOverview();
             })
+        }, computed :{
+            checkViewWidth(){
+                const width = {};
+                console.log(this.$vuetify.breakpoint.smAndDown);
+                if (this.$vuetify.breakpoint.smAndDown){
+                    this.phoneDetected = true;
+                }  else {
+                    this.phoneDetected = false;
+                }
+
+
+            }
         }
     }
 </script>
 
 <style scoped>
+    .optionContent {
+        padding-left: 20px;
+        font-size: 15px;
+        padding-top: 20px;
+    }
+    .editContainer {
+        padding-top: 24px;
+    }
+    .optionsTabs{
+
+        font-weight:500;
+        color: #7E8B92;
+        padding-left: 28px;
+    }
+    .normaltab {
+        transition: .4s;
+        cursor: pointer;
+        border-bottom: 2px solid rgba(246, 74, 72, 0);
+    }
+    .tabActive {
+
+        color: #475963;
+        border-bottom: 2px solid rgba(246, 74, 72, 1) !important;
+
+
+    }
+    .chartbutton {
+        transition: .2s;
+        cursor: pointer;
+        background: #455a64;
+        padding: 5px 15px;
+        color: white;
+        font-size: 12px;
+        border-radius: 25px;
+        margin-left: 5px;
+        float:right;
+        margin-top: 5px;
+    }
+    .chartbutton:hover{
+        background: #37474f;
+        /*border: 2px solid #37474f;*/
+    }
+
+
     .bigboy {
         width: 100%;
     }
