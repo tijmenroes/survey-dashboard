@@ -4,10 +4,10 @@
 
         <div class="filterList">
 
-        <div :key="index" @click="delFilter(index)"
+        <div :key="index"
         class="chippie" v-for="(filter,index)  in $store.state.filters">
-        Q{{filter.Question}}: {{filter.Answer.toString()}}
-        <v-icon right small> close</v-icon>
+        <span>Q{{filter.Question}}: {{filter.Answer.toString()}}</span>
+        <v-icon right small @click="delFilter(index)"> close</v-icon>
         </div>
 
         </div>
@@ -19,7 +19,10 @@
         name: "FilterList",
         methods:{
             delFilter(number) {
-                console.log(number);
+                this.$store.commit('delFilter', number);
+                this.$store.commit('ConfigureAnswers', number);
+            },
+            editFilter(number) {
                 this.$store.commit('delFilter', number);
                 this.$store.commit('ConfigureAnswers', number);
             }
@@ -30,6 +33,7 @@
 <style scoped>
     .filterList {
         margin-top: 15px;
+        margin-bottom: 15px;
     }
     h3{
         font-size: 12px;

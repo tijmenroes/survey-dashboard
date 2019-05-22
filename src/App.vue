@@ -4,9 +4,17 @@
         <div id="crumbpath" class="clear">
 
             <h2>Formulieren</h2>
-            <div class="pageButtons">
-                 <v-btn class="Vuebutton text-none" v-for="(button,index) in buttons" @click="pageNumber = index" flat depressed>{{button}}</v-btn>
-            </div>
+            <!--<div class="pageButtons">-->
+                <ul class="pageTabs">
+                    <li v-for="(button,index) in buttons"  v-if="pageNumber === index" class="active">
+                        {{button}}
+                    </li>
+                    <li v-else @click="pageNumber = index">
+                        {{button}}
+                    </li>
+                </ul>
+
+            <!--</div>-->
         </div>
 
         <v-dialog
@@ -96,32 +104,44 @@ export default {
         logSurvey(id){
             this.$store.state.loading = true;
             console.log(id);
+            axios.all([
+                axios.get('https://survey-api.test.tc8l.nl/api/survey/questions/' + id),
+                axios.get('https://survey-api.test.tc8l.nl/api/survey/answers/' + id)
+
+            ]).then(axios.spread((surveyQuestions, surveyAnswers) => {
+                console.log(surveyQuestions);
+                console.log(surveyAnswers);
+            }));
             axios.get('https://survey-api.test.tc8l.nl/api/survey/questions/' + id)
                 .then(response => {
-
+                    let qNameArray = [];
                     //    console.log(response.data.data.pages[0].questions);
-                    this.questions = response.data.data.pages[0].questions;
+                    // this.questions = response.data.data.pages[0].questions;
+                    for(let vraag in response.data.data.pages[0].questions){
+                        qNameArray.push(response.data.data.pages[0].questions[vraag].name);
+                    }
                     this.$store.commit('setSurveyQuestions', response.data.data.pages[0].questions);
                     //const resultArray = [];
 
                     //this.questions = resultArray; //Link m aan de display
                     axios.get('https://survey-api.test.tc8l.nl/api/survey/answers/' + id)
                         .then(output => {
-                            //console.log(response.data.data);
-                            //  this.answers = response.data.data;
-
                             const userArray = [];
-                            for(let user in output.data.data) {
-                                //const AnswerArray = [];
-                                const  AnswerArray = Object.values(output.data.data[user].answers);
-                                userArray.push({"dateTime": output.data.data[user].dateTime, "answers": AnswerArray})
-                            }
+                                for(let user in output.data.data) {
 
-                            this.answers = userArray;
+                                    let AnswerArray = [];
 
+                                    for(let lol in qNameArray) {
+                                        const text = qNameArray[lol];
+                                        const poepjes = output.data.data[user].answers[text];
+                                        AnswerArray.push(poepjes);
+                                    }
+                                    userArray.push({"dateTime": output.data.data[user].dateTime, "answers": AnswerArray});
+                                    }
+;
                             this.$store.commit('setUserData', userArray);
                             this.$store.commit('ConfigureAnswers');
-                            //const resultArray = [];
+
                             this.$store.state.loading = false;
                         }).catch(error => {
 
@@ -162,7 +182,7 @@ export default {
     },
   created(){
       console.log(this.source);
-      this.logSurvey(24000);
+      this.logSurvey(24204);
 
     },
     mounted(){
@@ -186,9 +206,39 @@ export default {
         border-bottom: 1px solid #cecece;
     }
 
-  .Vuebutton {
-    /*float:right;*/
+  .pageTabs{
+      transition: .2s;
+      position: absolute;
+      right: 20px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      top: 10px;
   }
+  .pageTabs li{
+      transition: .2s;
+      display: inline-block;
+      margin-right: 5px;
+      padding: 15px 35px;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid #dbdbdb;
+      border: 1px solid transparent;
+      border-bottom: none;
+      font-size: 14px;
+      background: #455a64;
+      background: 0 0;
+      color: #353535;
+      border-radius: 4px 4px 0 0;
+  }
+  .pageTabs .active, .pageTabs li:hover {
+      transition: .2s;
+      background: #fff;
+      color: #40475f;
+      border: 1px solid #dbdbdb;
+      border-bottom: none;
+  }
+
 
   .app {
     background: white;

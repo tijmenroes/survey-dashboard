@@ -4,11 +4,11 @@
               <MenuComponent @toList="listview" @toDash="dashboardview" :toPrint="$refs"></MenuComponent>
               <FilterBox></FilterBox>
 
-              <FilterList></FilterList>
+
             <v-container fluid grid-list-xs style="padding: 0 !important">
 
                 <v-layout ref="printMe" row style="background-color: white" wrap v-bind="checkViewWidth">
-                    <v-flex :key="i" :lg12="chart.isList" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" md6 :pl-3="!phoneDetected" :pr-3="!phoneDetected" pb-3 v-for="(chart,i) in chartArray.charts"
+                    <v-flex :key="i" xs12 :lg12="chart.isList" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" sm6 :pl-3="!phoneDetected" :pr-3="!phoneDetected" pb-4 v-for="(chart,i) in chartArray.charts"
                             >
                         <v-expansion-panel
                                 expand
@@ -100,10 +100,13 @@
 
                                                         </v-layout>
                                                     </div>
+                                                        <div class="backButtonContainer">
+                                                            <div class="chartbutton backbutton" @click="chart.menuShow =! chart.menuShow">
+                                                                Ga Terug
+                                                            </div>
+                                                        </div>
 
-                                                        <v-btn @click="chart.menuShow =! chart.menuShow" class="text-none" color="#475A64" dark
-                                                               small>Ga Terug
-                                                        </v-btn>
+
                                                 </div>
                                                 </div>
                                             </v-expand-transition>
@@ -114,8 +117,11 @@
                                             class="bigboy"></v-chart>
                                     </div>
                                     <div v-else>
+                                        <v-container v-if="chart.menuShow === false">
+                                            Antwoorden: {{reactiveData[i].SumAnswers}}
 
-                                           <ul>
+                                        </v-container>
+                                           <ul class="textCard">
                                                <li v-for="data in chart.answers">
                                                    {{data}}
                                                </li>
@@ -150,7 +156,7 @@
     import 'echarts/lib/component/markLine'
     import FilterBox from '../components/FilterBox.vue'
     import MenuComponent from '../components/MenuComponent.vue'
-    import FilterList from '../components/FilterList.vue'
+
 
 
     export default {
@@ -159,7 +165,7 @@
         components: {
             FilterBox,
             MenuComponent,
-            FilterList,
+
             'v-chart': ECharts,
         },
 
@@ -193,6 +199,7 @@
             }
         },
         methods: {
+
             listview(){
               for(let key in this.chartArray.charts){
                   this.chartArray.charts[key].isList = true;
@@ -236,20 +243,23 @@
                 grafiek.xAxis.show = true;
                 grafiek.xAxis.type = 'category';
                 grafiek.yAxis.type = 'value';
-
+               // grafiek.series[0].type = 'line';
                 if (grafiek.series[0].label.formatter === "{d}%" && option < 3) {
+                    grafiek.radioGroup = 0;
                     grafiek.series[0].label.show = false;
-                } else if (grafiek.series[0].label.formatter === "{d}%" && option > 2) {
-                    grafiek.series[0].label.show = true;
                 }
 
                 if (option === 0) {
+
+
+                   // grafiek.series[0].type = 'line';
                     grafiek.series[0].type = 'line';
+
                 } else if (option === 1) {
-                    console.log(grafiek.yAxis.data);
-                    console.log(grafiek.xAxis.data);
+
                     grafiek.series[0].type = 'bar';
                     grafiek.series[0].itemStyle.borderWidth = 0;
+
                 } else if (option === 2) {
 
                     grafiek.series[0].type = 'bar';
@@ -257,7 +267,7 @@
                     grafiek.yAxis.type = 'category';
                     grafiek.series[0].itemStyle.borderWidth = 0;
                     grafiek.yAxis.data = grafiek.xAxis.data;
-                    console.log(grafiek.yAxis.data)
+
 
                 } else if (option === 3) {
                     grafiek.series[0].markLine.data = null;
@@ -277,21 +287,40 @@
             },
 
             drawCharts() {
+
+
                 for (let chart in this.chartArray.charts) {
-                    this.chartArray.charts[chart].series[0].data = this.reactiveData[chart].questionAnswers;
+                    if (this.chartArray.charts[chart].chartType > 0) {
+                        //       if(this.chartArray.charts)
+                        this.chartArray.charts[chart].series[0].data = this.reactiveData[chart].questionAnswers;
 
-                    let allowed = 0;
-                    for(let optie in this.reactiveData[chart].questionAnswers){
+                        let allowed = 0;
+                        for (let optie in this.reactiveData[chart].questionAnswers) {
 
-                        if (this.reactiveData[chart].questionAnswers[optie].value !== null) {
-                            allowed++;
+                            if (this.reactiveData[chart].questionAnswers[optie].value !== null) {
+                                allowed++;
+                            }
                         }
-                    }
 
-                    if(allowed === 0){
-                        this.chartArray.charts[chart].zerovalues = true;
-                    } else{
-                        this.chartArray.charts[chart].zerovalues = false
+                        if (allowed === 0) {
+                            this.chartArray.charts[chart].zerovalues = true;
+                        } else {
+                            this.chartArray.charts[chart].zerovalues = false
+                        }
+                    }else {
+                         //Wanneer het een tekstvak is
+
+                        const answerArray = [];
+                        for(let answer in this.reactiveData[chart].questionAnswers){
+                            if (this.reactiveData[chart].questionAnswers[answer] != null) {
+
+                                answerArray.push(this.reactiveData[chart].questionAnswers[answer]);
+                            }
+
+                            this.chartArray.charts[chart].answers = answerArray;
+
+                        }
+
                     }
                 }
             },
@@ -323,7 +352,7 @@
                             chartType: 0,
                             answers: answerArray
                         };
-                        console.log(chart.answers);
+
                         this.chartArray.charts.push(chart)
                     }
                     else {
@@ -397,7 +426,7 @@
                                 grafiek.series[0].type = 'bar';
                                 grafiek.series[0].itemStyle.borderWidth = 0;
                                 if (this.reactiveData[key].Type > 1) {
-                                    grafiek.bigDiv = true;
+                                    // grafiek.bigDiv = true;
                                 }
                             }
                             this.chartArray.charts.push(chart)
@@ -420,17 +449,17 @@
             this.initOverview();
             this.$store.watch(this.$store.getters.getData, configuredSurvey => {
                 this.reactiveData = configuredSurvey;
-                console.log(this.reactiveData);
+
                 this.drawCharts();
             });
             this.$store.watch(this.$store.getters.getReset, reset => {
-                    this.initOverview();
+                console.log('resetted');
+                this.initOverview();
             })
         }, computed :{
             checkViewWidth(){
-                const width = {};
-                console.log(this.$vuetify.breakpoint.smAndDown);
-                if (this.$vuetify.breakpoint.smAndDown){
+
+                if (this.$vuetify.breakpoint.xsOnly){
                     this.phoneDetected = true;
                 }  else {
                     this.phoneDetected = false;
@@ -481,11 +510,33 @@
         float:right;
         margin-top: 5px;
     }
+    .backbutton {
+        float: left;
+    }
+    .backButtonContainer {
+        padding-left: 20px;
+    }
     .chartbutton:hover{
         background: #37474f;
         /*border: 2px solid #37474f;*/
     }
+    .textCard{
+        max-height: 400px;
+        overflow: auto;
+        line-height: 35px;
+        padding: 0px;
 
+
+    }
+    .textCard li {
+        padding: 10px;
+
+        list-style:none;
+
+    }
+   .textCard li:nth-child( odd ) {
+        background: #fafafa;
+    }
 
     .bigboy {
         width: 100%;

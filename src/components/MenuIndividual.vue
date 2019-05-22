@@ -14,7 +14,7 @@
         <ul>
             <li>
                 <!--<DataFilter></DataFilter>-->
-                <div class="menuButton " @click="sluitbox"> Exporteren</div>
+                <div class="menuButton " @click="exportEmit"> Exporteren</div>
             </li>
             <!--<li>-->
                 <!--&lt;!&ndash;<ExportComponent :toPrint="toPrint"></ExportComponent>&ndash;&gt;-->
@@ -77,6 +77,9 @@
             },
             emitList(){
                 this.$emit('toList');
+            },
+            exportEmit(){
+                this.$emit('export');
             }
         }
     }

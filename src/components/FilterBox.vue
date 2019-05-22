@@ -1,7 +1,5 @@
 <template>
     <div>
-
-
             <v-expand-transition >
                 <div class="boxContainer" v-show="$store.state.filterActive">
             <v-container fluid class="boxContent">
@@ -21,62 +19,58 @@
                                         >
                                         </v-autocomplete>
                     </v-flex>
-                    <!--<v-flex >-->
-                        <!--<v-menu offset-y>-->
-                            <!--<template v-slot:activator="{ on }">-->
-                                <!--<div-->
-                                        <!--class="keuzeButton choiceMenu"-->
-                                        <!--v-on="on"-->
-                                        <!--append-icon="arrow_drop_down"-->
-                                <!--&gt;-->
-                                    <!--Nieuwe filter-->
 
-                                <!--</div>-->
-
-                            <!--</template>-->
-
-                            <!--<v-list>-->
-                                <!--<v-list-tile-->
-                                        <!--:key="index"-->
-                                        <!--@click="selectItem(index)"-->
-                                        <!--v-for="(item, index) in $store.state.configuredSurvey"-->
-                                <!--&gt;-->
-                                    <!--<v-list-tile-title>{{ item.Title }}</v-list-tile-title>-->
-                                <!--</v-list-tile>-->
-                            <!--</v-list>-->
-                        <!--</v-menu>-->
-                    <!--</v-flex>-->
                     <v-flex shrink >
                         <div class="menuButton " @click="$store.state.filterActive = false"> Terug</div>
-
                     </v-flex>
-
                 </v-layout>
-
-
 
                 </dl>
                 <div v-else>
                     Q{{filterStatus}}: {{$store.state.configuredSurvey[filterStatus].Title}}
                     <div class="mt-2">
+                        <v-layout column row>
 
-                        <div v-for="(keuzes, index) in $store.state.configuredSurvey[filterStatus].questionChoices">
+
+                        <v-flex xs6  lg8 v-for="(keuzes, index) in $store.state.configuredSurvey[filterStatus].questionChoices">
                             <v-checkbox
                                     :label="keuzes" :value="$store.state.configuredSurvey[filterStatus].questionChoices[index]"
                                     color="#707171" v-model="filterVModel[filterStatus].choices" class="selectievakje">
                             </v-checkbox>
-                        </div>
+                        </v-flex>
+                        </v-layout>
                     </div>
-                    <v-btn @click="discardFilter">Discard</v-btn>
-
-                    <v-btn @click="saveFilter(filterVModel[filterStatus].choices, filterStatus)">Save</v-btn>
+                    <ul>
+                        <li>
+                            <div class="saveButton menuButton" @click="saveFilter(filterVModel[filterStatus].choices, filterStatus)">
+                                Opslaan
+                            </div>
+                        </li>
+                        <li>
+                            <div class="backButton menuButton"  @click="discardFilter">
+                                Terug
+                            </div>
+                        </li>
+                    </ul>
                 </div>
-
-                <!--<div class="menuButton " @click=""> Terug</div>-->
             </v-container>
 
         </div>
             </v-expand-transition>
+
+        <div v-if="$store.state.filters.length > 0">
+            <h3>FILTERS</h3>
+
+            <div class="filterList">
+
+                <div :key="index"
+                     class="chippie" v-for="(filter,index)  in $store.state.filters">
+                    <span @click="editFilter(index)">Q{{filter.Question}}: {{filter.Answer.toString()}}</span>
+                    <v-icon right small @click="delFilter(index)"> close</v-icon>
+                </div>
+
+            </div>
+        </div>
     </div>
 
 </template>
@@ -86,7 +80,7 @@
         name: "FilterBox",
         watch:{
           model(){
-              console.log('da minde nie');
+
               for(let vraag in this.$store.state.configuredSurvey){
                   if(this.$store.state.configuredSurvey[vraag].Title === this.model){
                    this.filterStatus = vraag;
@@ -108,7 +102,12 @@
             }
         },
         methods: {
-
+            editFilter(index){
+                console.log(index);
+                this.showMenu = false;
+                this.$store.state.filterActive = true;
+                this.filterStatus = index;
+            },
             selectItem(index) {
                 this.showMenu = false;
                 this.$store.state.filterActive = true;
@@ -175,7 +174,25 @@
 </script>
 
 <style scoped>
-
+    ul {
+        display:inline-block;
+        padding-left: 0;
+    }
+    li{
+        display:inline-block;
+    }
+    .saveButton {
+        padding: 8px 25px;
+        background: #00bfa5;
+        border: 2px solid #00bfa5;
+    }
+    .saveButton:hover{
+        background: #009688;
+        border: 2px solid #009688;
+    }
+    .backButton{
+        padding: 8px 25px;
+    }
     .choiceMenu {
         width: 250px;
         margin: 0;
@@ -202,6 +219,26 @@
         box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
 
         margin-bottom: 30px;
+    }
+    .filterList {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+    h3{
+        font-size: 12px;
+        font-weight: 700;
+        color: #40475f;
+        padding: 0 0 10px 0;
+        border-bottom: 1px solid #e3e8e9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .chippie{
+        background: #fff;
+        display: inline-block;
+        border-radius: 22px;
+        padding: 8px 20px;
+        border: 2px solid #00bfa5 !important;
     }
 
     form {

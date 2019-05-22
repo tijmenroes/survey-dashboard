@@ -34,15 +34,17 @@ export const store = new Vuex.Store({
         addFilter(state, {answer, question}) {
             const array = [];
             let counter = 0;
+
             for (let key in state.surveyAnswers) {
+
                 for (let aantal in answer) {
-                    console.log(state.surveyAnswers[key].answers);
+
                     if(typeof state.surveyAnswers[key].answers[question] === "object" ) {
 
                             for (let entry in state.surveyAnswers[key].answers) {
 
                                 if(typeof state.surveyAnswers[key].answers[question][entry] === "string" ) {
-                                    counter++
+                                    counter++;
                                 if (state.surveyAnswers[key].answers[question][entry] === answer[aantal]) {
 
                                     array.push(state.surveyAnswers[key])
@@ -64,32 +66,55 @@ export const store = new Vuex.Store({
 
            //question to int to display it right. care.
             let int = +question + 1;
-            console.log(int);
+
             state.filters.push({'Question': int, 'Answer': answer, 'Code': [{'q': question, 'a': answer}]});
             state.surveyAnswers = array;
 
         },delFilter(state, number){
 
             state.filters.splice(number ,1);
-            state.surveyAnswers = state.surveyOldData;
-            const array = [];
+            // state.surveyAnswers = state.surveyOldData;
+
+            const questionArray = [];
+            let array = [];
+            let fullArray = state.surveyOldData;
 
             if(state.filters.length > 0) {
 
                 for (let filter in state.filters) {
                     const question = state.filters[filter].Code[0].q;
                     const answer = state.filters[filter].Code[0].a;
-
-                    for (let key in state.surveyAnswers) {
+                    for(let key in fullArray) {
                         for (let aantal in answer) {
 
-                            if (state.surveyAnswers[key].answers[question] ===answer[aantal]) {
+                            if (typeof fullArray[key].answers[question] === "object") {
 
-                                array.push(state.surveyAnswers[key])
+                                for (let entry in fullArray[key].answers) {
+
+                                    if (typeof fullArray[key].answers[question][entry] === "string") {
+                                        // counter++;
+                                        if (fullArray[key].answers[question][entry] === answer[aantal]) {
+
+                                            array.push(fullArray[key])
+                                        }
+                                    }
+                                }
+
+                            } else {
+
+                                if (fullArray[key].answers[question] === answer[aantal]) {
+                                    array.push(fullArray[key])
+                                }
+
                             }
+
                         }
                     }
+
+
                 }
+                // console.log(fullArray);
+                // console.log(array);
                 state.surveyAnswers = array;
             }
         },  ConfigureAnswers(state) {
@@ -125,22 +150,26 @@ export const store = new Vuex.Store({
 
             for (let key in state.surveyQuestions) {
                 const answerArray = [];
+                 const name = state.surveyQuestions[key].name;
 
-                if(state.surveyQuestions[key].type === "text" ){
+
+                if(state.surveyQuestions[key].type === "text" || state.surveyQuestions[key].type === "comment"  ){
                     for (let user in state.surveyAnswers) {
 
                         answerArray.push(state.surveyAnswers[user].answers[key]);
 
 
                     }
+                    const length = answerArray.filter(function(value) { return value !== undefined }).length;
+
                     dataArray.push({
                         "Title": state.surveyQuestions[key].title,
 
                         questionAnswers: answerArray,
                         Type: 5,
-                        SumAnswers: 35
+                        SumAnswers: length
                     });
-                    console.log(dataArray);
+
                 } else {
                 let questionType = 0;
 
@@ -149,6 +178,9 @@ export const store = new Vuex.Store({
 
                for (let user in state.surveyAnswers) {
                     answerArray.push(state.surveyAnswers[user].answers[key]);
+                   //  console.log(state.surveyAnswers[user].answers);
+                   //
+                   // console.log(state.surveyAnswers[user].answers.indexOf(name))
                }
 
 

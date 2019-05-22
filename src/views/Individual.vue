@@ -1,9 +1,8 @@
 <template>
     <div>
 
-        <MenuIndividual></MenuIndividual>
-        <!--<searchBox></searchBox>-->
-        <v-expand-transition >
+        <MenuIndividual @export="jsonConvert"></MenuIndividual>
+           <v-expand-transition >
             <div class="boxContainer" v-show="$store.state.searchActive">
                 <v-container fluid class="boxContent">
                     <dl class="inputje">
@@ -19,7 +18,6 @@
                                         box
                                         dense
                                         background-color="#fff"
-
                                 ></v-text-field>
                             </v-flex>
 
@@ -29,8 +27,6 @@
                             </v-flex>
 
                         </v-layout>
-
-
 
                     </dl>
 
@@ -61,12 +57,12 @@
                             <template slot="headerCell" slot-scope="props">
                                 <v-tooltip bottom>
                                     <template v-slot:activator="{ on }">
-          <span v-on="on" class="text-truncate">
+          <span v-on="on" class="headers">
             {{ props.header.text }}
           </span>
                                     </template>
                                     <span >
-          {{ props.header.value }}
+          {{ props.header.hover }}
         </span>
                                 </v-tooltip>
                             </template>
@@ -95,14 +91,20 @@
             <v-btn @click="jsonConvert">Export to Excel</v-btn>
             <v-dialog
                     v-model="dialog"
-                    width="500">
+                    width="600">
                 <v-card>
                     <v-card-title>
-                        Dialog text
+                        Antwoorden
                     </v-card-title>
                     <v-card-text>
 
-                        <p v-for="headerke in headers">{{headerke.text}}<br>{{dialogText[headerke.value]}}</p>
+                        <div v-for="headerke in headers"><p>
+
+                        <strong>{{headerke.text}}</strong>
+
+                            <br>
+                                {{dialogText[headerke.value]}}
+                            </p></div>
                     </v-card-text>
                     <v-divider></v-divider>
                 </v-card>
@@ -150,17 +152,24 @@
             configureHeaders() {
                 let headerArray = [];
                 headerArray.push({text: "ID", value: "id"});
-                headerArray.push({text: "dateTime", value: "dateTime"});
+                headerArray.push({text: "date and time", value: "dateTime"});
                 const questions = this.$store.state.surveyQuestions;
                 for (let question in questions) {
                     var text = 'Q' + question.toString() + '. ' + questions[question].title;
+                    const headerText = text;
                     var number = 'q' + question.toString();
-                    headerArray.push({text: text, value: number})
+                    if(text.length > 35){
+
+                        text = text.slice(0,32);
+                        text = text + "...";
+                        console.log(text);
+                    }
+                    headerArray.push({text: text, value: number, hover: headerText})
                 }
                 this.headers = headerArray;
             }, configureRows(){
                 this.rows = [];
-                const users = this.$store.state.surveyAnswers;
+                const users = this.$store.state.surveyOldData;
 
                 for (let user in users) {
                     let date = new Date(users[user].dateTime);
@@ -183,6 +192,7 @@
                                 for(let keuze in users[user].answers[answer]){
                                     answerArray.push( " " +users[user].answers[answer][keuze].toString() )
                                 }
+
                                 const antwoord = 'q' + answer.toString();
                                 userArray[antwoord] = answerArray.toString()
 
@@ -296,7 +306,9 @@ table.v-table tbody tr:nth-child(even) td {
 table.v-table tbody tr:hover{
     background-color: black !important;
 }
-
+.headers {
+    letter-spacing: -.5px;
+}
 
 .choiceMenu {
     width: 250px;

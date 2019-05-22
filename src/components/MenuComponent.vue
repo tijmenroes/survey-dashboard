@@ -37,7 +37,10 @@
 
                 </li>
                 <li>
+                    <div class="selectDiv">
 
+
+                    <label>weergave:</label>
                     <v-menu offset-y >
                         <template v-slot:activator="{ on }">
                             <div
@@ -57,6 +60,7 @@
                             </v-list-tile>
                         </v-list>
                     </v-menu>
+                    </div>
                 </li>
             </ul>
 
@@ -159,6 +163,7 @@
         float: left;
     }
     .selectButton {
+        cursor: pointer;
         font-weight: 400;
         color: black;
         background:white;
@@ -174,5 +179,8 @@
         min-height: 75px;
         padding: 0;
 
+    }
+    .selectDiv{
+        display:inline-block;
     }
 </style>
