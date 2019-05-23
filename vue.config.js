@@ -2,8 +2,8 @@
 //
 module.exports = {
     publicPath: process.env.NODE_ENV === 'production'
-        ? 'Tijmen/testke/Scripts/reporting/'
-        : 'Tijmen/testke/Scripts/reporting/',
+        ? 'testke/Scripts/reporting/'
+        : 'testke/Scripts/reporting/',
     configureWebpack: {
        //runtimeCompiler: true,
         resolve: {

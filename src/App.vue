@@ -2,10 +2,8 @@
   <v-app class="app">
     <v-content>
         <div id="crumbpath" class="clear">
-
             <h2>Formulieren</h2>
-            <!--<div class="pageButtons">-->
-                <ul class="pageTabs">
+                     <ul class="pageTabs">
                     <li v-for="(button,index) in buttons"  v-if="pageNumber === index" class="active">
                         {{button}}
                     </li>
@@ -13,10 +11,7 @@
                         {{button}}
                     </li>
                 </ul>
-
-            <!--</div>-->
         </div>
-
         <v-dialog
                 v-model="$store.state.loading"
                 persistent
@@ -38,20 +33,16 @@
         </v-dialog>
 
     <div id="dashboard">
-    <!--<MenuComponent :toPrint="$refs" v-if="$store.state.configuredSurvey.length > 0"></MenuComponent>-->
-
-    <!--<FilterBox></FilterBox>-->
-
 
 <div v-if="$store.state.configuredSurvey.length > 0">
 
       <keep-alive>
 
-      <Overview ref="printMe" v-if="pageNumber === 2"></Overview>
+      <Overview ref="printMe" v-if="pageNumber === 0"></Overview>
 
       <Individual v-else-if="pageNumber === 1"></Individual>
 
-        <div v-else-if="pageNumber === 0">
+        <div v-else-if="pageNumber === 2">
         <SurveyView></SurveyView>
         </div>
 
@@ -59,7 +50,7 @@
 
 </div>
     <v-layout v-else>
-        Oeps hier gaat iets fout!
+        Loading...
     </v-layout>
 
     </div>
@@ -72,7 +63,6 @@
 import Overview from "./views/Overview.vue";
 import SurveyView from "./views/SurveyView.vue";
 
-// import FilterBox from './components/FilterBox.vue'
 import axios from 'axios'
 
 export default {
@@ -80,25 +70,15 @@ export default {
   props: ['source'],
   components: {
     Overview, SurveyView,
-      //FilterBox,
     Individual: () => import('./views/Individual.vue'),
-      // MenuComponent
   },
 
   data () {
     return {
-      pageNumber: 2,
-      oldData: [],
-
-      filters: [],
-     users: [],
-      poep:  {'answers': []},
-      lol: [],
+      pageNumber:0,
       supertof: null,
-      data: [],
 
-      buttons: ["Statistics", "Individual", "Overview"],
-
+      buttons: ["Overview", "Individual","Statistics"],
     }
   },methods:{
         logSurvey(id){
@@ -107,43 +87,26 @@ export default {
             axios.all([
                 axios.get('https://survey-api.test.tc8l.nl/api/survey/questions/' + id),
                 axios.get('https://survey-api.test.tc8l.nl/api/survey/answers/' + id)
-
             ]).then(axios.spread((surveyQuestions, surveyAnswers) => {
-                console.log(surveyQuestions);
-                console.log(surveyAnswers);
-            }));
-            axios.get('https://survey-api.test.tc8l.nl/api/survey/questions/' + id)
-                .then(response => {
-                    let qNameArray = [];
-                    //    console.log(response.data.data.pages[0].questions);
-                    // this.questions = response.data.data.pages[0].questions;
-                    for(let vraag in response.data.data.pages[0].questions){
-                        qNameArray.push(response.data.data.pages[0].questions[vraag].name);
+                let qNameArray = [];
+                for(let vraag in surveyQuestions.data.data.pages[0].questions){
+                    qNameArray.push(surveyQuestions.data.data.pages[0].questions[vraag].name);
+                }
+                this.$store.commit('setSurveyQuestions', surveyQuestions.data.data.pages[0].questions);
+                const userArray = [];
+                for(let user in surveyAnswers.data.data) {
+                    let AnswerArray = [];
+                    for(let name in qNameArray) {
+                        const text = qNameArray[name];
+                        AnswerArray.push(surveyAnswers.data.data[user].answers[text]);
                     }
-                    this.$store.commit('setSurveyQuestions', response.data.data.pages[0].questions);
-                    //const resultArray = [];
-
-                    //this.questions = resultArray; //Link m aan de display
-                    axios.get('https://survey-api.test.tc8l.nl/api/survey/answers/' + id)
-                        .then(output => {
-                            const userArray = [];
-                                for(let user in output.data.data) {
-
-                                    let AnswerArray = [];
-
-                                    for(let lol in qNameArray) {
-                                        const text = qNameArray[lol];
-                                        const poepjes = output.data.data[user].answers[text];
-                                        AnswerArray.push(poepjes);
-                                    }
-                                    userArray.push({"dateTime": output.data.data[user].dateTime, "answers": AnswerArray});
-                                    }
-;
-                            this.$store.commit('setUserData', userArray);
-                            this.$store.commit('ConfigureAnswers');
-
-                            this.$store.state.loading = false;
-                        }).catch(error => {
+                    userArray.push({"dateTime": surveyAnswers.data.data[user].dateTime, "answers": AnswerArray});
+                }
+                this.$store.commit('setUserData', userArray);
+                this.$store.commit('ConfigureAnswers');
+                this.$store.state.loading = false;
+            }))
+           .catch(error => {
 
                         // error = error.toString();
                         // if(error.includes('code 500')){
@@ -159,36 +122,14 @@ export default {
 
                     });
                     this.$store.state.loading = false;
-                }).catch(error => {
-                //
-                // error = error.toString();
-                // if(error.includes('code 500')){
-                //     this.errorText = "Bestaat niet"
-                // }else if(error.includes('undefined')) {
-                //     this.errorText = "Geen vragen/ niet goed opgesteld"
-                // } else {
-                //     this.errorText = "Gewoon een error"
-                // }
-                // // this.errorText = error;
-                // this.noError = false
-                // // this.$store.state.loading = false;
-
-            });
-
-
-
-
         }
     },
   created(){
       console.log(this.source);
       this.logSurvey(24204);
 
-    },
-    mounted(){
-
     }
-}
+ }
 </script>
 
 <style scoped>
@@ -213,7 +154,7 @@ export default {
       list-style: none;
       margin: 0;
       padding: 0;
-      top: 10px;
+      top: 12px;
   }
   .pageTabs li{
       transition: .2s;
@@ -243,9 +184,5 @@ export default {
   .app {
     background: white;
   }
-  .headline{
-    color: #40475f;
-    text-transform: uppercase;
-    font-size: 14px !important;
-  }
+
 </style>

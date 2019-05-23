@@ -41,14 +41,18 @@
                                         <div>
                                             <v-expand-transition>
                                                 <div v-show="chart.menuShow" class="editContainer">
-                                                    <span v-for="(button,index) in buttons" @click="chart.menuNumber = index" class="optionsTabs ">
-
-                                                    <span
-                                                        class="tabActive normaltab" v-if="chart.menuNumber === index">
+                                                    <ul class="tabList">
+                                                        <li v-for="(button,index) in buttons" @click="chart.menuNumber = index" class="optionsTabs ">
+                                                             <span class="tabActive normaltab" v-if="chart.menuNumber === index">
                                                     {{button}}
                                                     </span>
                                                     <span class="normaltab" v-else-if="chart.menuNumber !== index"> {{button}}
                                                     </span>
+                                                        </li>
+                                                    </ul>
+                                                    <span v-for="(button,index) in buttons" @click="chart.menuNumber = index" class="optionsTabs ">
+
+
 
                                                     </span>
 
@@ -102,7 +106,7 @@
                                                     </div>
                                                         <div class="backButtonContainer">
                                                             <div class="chartbutton backbutton" @click="chart.menuShow =! chart.menuShow">
-                                                                Ga Terug
+                                                                Sluit
                                                             </div>
                                                         </div>
 
@@ -328,7 +332,6 @@
                 this.chartArray = {
                     charts: []
                 };
-               // console.log(this.reactiveData);
                 for (let key in this.reactiveData) {
                     if(this.reactiveData[key].Type === 5){
                         console.log('wowzers');
@@ -338,9 +341,7 @@
 
                                 answerArray.push(this.reactiveData[key].questionAnswers[answer]);
                             }
-
                         }
-                    //    this.chartArray.charts.push(answers)
                         const chart = {
                             bigDiv: false,
                             isList: false,
@@ -352,18 +353,12 @@
                             chartType: 0,
                             answers: answerArray
                         };
-
                         this.chartArray.charts.push(chart)
                     }
                     else {
-
-
                         let allowed = 0;
-
                         for (let optie in this.reactiveData[key].questionAnswers) {
-
                             if (this.reactiveData[key].questionAnswers[optie].value != null) {
-
                                 allowed++;
                                 break;
                             }
@@ -395,11 +390,9 @@
                                         borderWidth: 2.3,
                                     },
                                     label: {
-                                        // show: true,
                                         formatter: '{d}%',
                                         position: 'inside'
                                     },
-                                    // color: "#3a84dd",
                                     smooth: true,
                                     symbolSize: 6,
                                     lineStyle: {
@@ -426,18 +419,14 @@
                                 grafiek.series[0].type = 'bar';
                                 grafiek.series[0].itemStyle.borderWidth = 0;
                                 if (this.reactiveData[key].Type > 1) {
-                                    // grafiek.bigDiv = true;
                                 }
                             }
                             this.chartArray.charts.push(chart)
                         } else {
-                            console.log('zero values fam');
                             this.chartArray.charts.push({zerovalues: true})
                         }
-
                     }
                 }
-
                 const tempPanel = [];
                 for (let key in this.chartArray.charts) {
                     tempPanel.push(0)
@@ -464,14 +453,18 @@
                 }  else {
                     this.phoneDetected = false;
                 }
-
-
             }
         }
     }
 </script>
 
 <style scoped>
+    .tabList{
+        display:inline-block;
+        float: right;
+        padding-left: 0;
+        padding-right: 20px;
+    }
     .optionContent {
         padding-left: 20px;
         font-size: 15px;
@@ -481,23 +474,37 @@
         padding-top: 24px;
     }
     .optionsTabs{
-
+        position: relative;
+        display:inline-block;
+        top: -9px;
         font-weight:500;
         color: #7E8B92;
-        padding-left: 28px;
+        padding-left: 4px;
+
     }
     .normaltab {
+        padding: 11px;
+        font-size: 13px;
         transition: .4s;
         cursor: pointer;
-        border-bottom: 2px solid rgba(246, 74, 72, 0);
+        border: 1px solid white;
+        border-bottom: none;
+        border-radius: 4px 4px 0 0;
     }
-    .tabActive {
+    .normaltab:hover {
+        border-color: #dbdbdb;
+        background:#EEEEEE;
 
         color: #475963;
-        border-bottom: 2px solid rgba(246, 74, 72, 1) !important;
-
 
     }
+    .tabActive {
+        color: #475963;
+        background:#EEEEEE;
+        border: 1px solid #dbdbdb;
+        border-bottom: none;
+
+     }
     .chartbutton {
         transition: .2s;
         cursor: pointer;
@@ -505,7 +512,7 @@
         padding: 5px 15px;
         color: white;
         font-size: 12px;
-        border-radius: 25px;
+        border-radius: 10px;
         margin-left: 5px;
         float:right;
         margin-top: 5px;

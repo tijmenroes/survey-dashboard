@@ -14,7 +14,7 @@
         <ul>
             <li>
                 <!--<DataFilter></DataFilter>-->
-                <div class="menuButton filterButton" @click="lmaotest"> Nieuwe filter</div>
+                <div class="menuButton filterButton" @click="openFilterBox"> Nieuwe filter</div>
             </li>
             <li>
                 <ExportComponent :toPrint="toPrint"></ExportComponent>
@@ -40,7 +40,7 @@
                     <div class="selectDiv">
 
 
-                    <label>weergave:</label>
+                    <label class="label">weergave:</label>
                     <v-menu offset-y >
                         <template v-slot:activator="{ on }">
                             <div
@@ -87,9 +87,9 @@
             restorePage(){
                 this.$store.commit('resetData');
                 this.$store.commit('ConfigureAnswers');
-                //this.$emit('resetPage');
+
             },
-            lmaotest(){
+            openFilterBox(){
                 this.$store.state.filterActive = true;
             },
             sluitbox(){
@@ -106,6 +106,11 @@
 </script>
 
 <style>
+    .label{
+        display: inline-block;
+        font-weight: 400;
+        padding-right: 6px;
+    }
     .filterButton {
         background: #00bfa5 !important;
         border: 2px solid #00bfa5 !important;
@@ -163,6 +168,7 @@
         float: left;
     }
     .selectButton {
+        display: inline-block;
         cursor: pointer;
         font-weight: 400;
         color: black;

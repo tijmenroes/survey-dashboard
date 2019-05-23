@@ -21,7 +21,7 @@
                     </v-flex>
 
                     <v-flex shrink >
-                        <div class="menuButton " @click="$store.state.filterActive = false"> Terug</div>
+                        <div class="menuButton " @click="$store.state.filterActive = false"> Sluit</div>
                     </v-flex>
                 </v-layout>
 
@@ -65,10 +65,10 @@
 
                 <div :key="index"
                      class="chippie" v-for="(filter,index)  in $store.state.filters">
-                    <span @click="editFilter(index)">Q{{filter.Question}}: {{filter.Answer.toString()}}</span>
+                    <span @click="editFilter(filter.Question, filter.Answer)">Q{{filter.Question}}: {{filter.Answer.toString()}}</span>
                     <v-icon right small @click="delFilter(index)"> close</v-icon>
                 </div>
-
+            {{$store.state.filters}}
             </div>
         </div>
     </div>
@@ -115,7 +115,7 @@
 
             }, saveFilter(answers, question) {
                 this.showMenu = true;
-                this.$store.state.filterActive = false;
+                // this.$store.state.filterActive = false;
                 this.selectedChoice = [];
                 this.FilterConfig(answers, question);
             },discardFilter(){
@@ -124,6 +124,7 @@
             },
             FilterConfig(answer, question) {
                 const filterExists = this.filterExists(answer, question);
+                console.log(filterExists);
                 if (answer.length === 0) {
                     alert('Selecteer een filter!');
                 } else {
@@ -132,7 +133,9 @@
                         this.$store.commit('ConfigureAnswers');
                         console.log("Filter send to vuex");
                     } else if (filterExists === "bestaat") {
-                        this.delFilter(question);
+                        // this.$store.commit('delFilter', question);
+                        console.log('jaja hij doet het hoor');
+                        this.$store.commit('delFilter', question);
                         this.$store.commit('addFilter', {answer, question});
                         this.$store.commit('ConfigureAnswers');
                     } else {
@@ -142,16 +145,41 @@
             },
             filterExists(answer, question) {
                 // console.log(answer);
+                console.log(question);
+                let number = null;
                 const filters = this.$store.state.filters;
-                if (typeof filters[question] === 'undefined') {
+                for(let filter in filters){
+                    if (typeof filters[filter] !== 'undefined') {
+                        if(filters[filter].Code[0].q === question){
+                            console.log('dat is m');
+                            number = filter;
+                        }
+                    }
+                }
+                if(number === null){
                     return false
                 } else {
-                    if (filters[question].Code[0].a === answer) {
+                    if (filters[number].Code[0].a === answer) {
                         return true;
                     } else {
                         return "bestaat";
                     }
                 }
+                //Meegeven waar die filter staat.
+
+                // if (typeof filters[filter] !== 'undefined') {
+                //
+                //     const number = filters[filter].Code[0].q;
+                //     if (filters[number].Code[0].a === answer) {
+                //         return true;
+                //     } else {
+                //         return "bestaat";
+                //     }
+                //
+                // } else {
+                //     return false
+                // }
+
             },
             delFilter(number) {
                 this.$store.commit('delFilter', number);

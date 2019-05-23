@@ -33,7 +33,8 @@ export const store = new Vuex.Store({
         },
         addFilter(state, {answer, question}) {
             const array = [];
-            let counter = 0;
+            console.log(answer);
+            console.log(question);
 
             for (let key in state.surveyAnswers) {
 
@@ -44,7 +45,7 @@ export const store = new Vuex.Store({
                             for (let entry in state.surveyAnswers[key].answers) {
 
                                 if(typeof state.surveyAnswers[key].answers[question][entry] === "string" ) {
-                                    counter++;
+
                                 if (state.surveyAnswers[key].answers[question][entry] === answer[aantal]) {
 
                                     array.push(state.surveyAnswers[key])
@@ -55,7 +56,8 @@ export const store = new Vuex.Store({
                     } else{
 
                         if (state.surveyAnswers[key].answers[question] === answer[aantal]) {
-                            array.push(state.surveyAnswers[key])
+                            array.push(state.surveyAnswers[key]);
+                            // console.log(state.surveyAnswers[key]);
                         }
 
                     }
@@ -69,41 +71,48 @@ export const store = new Vuex.Store({
 
             state.filters.push({'Question': int, 'Answer': answer, 'Code': [{'q': question, 'a': answer}]});
             state.surveyAnswers = array;
+            // console.log(state.surveyAnswers);
 
         },delFilter(state, number){
 
             state.filters.splice(number ,1);
+            console.log(number);
+            console.log(state.filters);
             // state.surveyAnswers = state.surveyOldData;
 
             const questionArray = [];
             let array = [];
             let fullArray = state.surveyOldData;
+            state.surveyAnswers = state.surveyOldData;
 
             if(state.filters.length > 0) {
 
                 for (let filter in state.filters) {
                     const question = state.filters[filter].Code[0].q;
                     const answer = state.filters[filter].Code[0].a;
-                    for(let key in fullArray) {
+
+
+                    for (let key in state.surveyAnswers) {
+
                         for (let aantal in answer) {
 
-                            if (typeof fullArray[key].answers[question] === "object") {
+                            if(typeof state.surveyAnswers[key].answers[question] === "object" ) {
 
-                                for (let entry in fullArray[key].answers) {
+                                for (let entry in state.surveyAnswers[key].answers) {
 
-                                    if (typeof fullArray[key].answers[question][entry] === "string") {
-                                        // counter++;
-                                        if (fullArray[key].answers[question][entry] === answer[aantal]) {
+                                    if(typeof state.surveyAnswers[key].answers[question][entry] === "string" ) {
 
-                                            array.push(fullArray[key])
+                                        if (state.surveyAnswers[key].answers[question][entry] === answer[aantal]) {
+
+                                            array.push(state.surveyAnswers[key])
                                         }
                                     }
                                 }
 
-                            } else {
+                            } else{
 
-                                if (fullArray[key].answers[question] === answer[aantal]) {
-                                    array.push(fullArray[key])
+                                if (state.surveyAnswers[key].answers[question] === answer[aantal]) {
+                                    array.push(state.surveyAnswers[key])
                                 }
 
                             }
