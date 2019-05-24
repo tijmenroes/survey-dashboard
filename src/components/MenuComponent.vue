@@ -1,9 +1,6 @@
 <template>
 
-<v-container fluid grid-list-sm style="padding: 0;">
-
-
-
+<v-container fluid grid-list-sm class="menuContainer" >
 
        <div class="menu">
            <v-layout row wrap>
@@ -13,8 +10,11 @@
 <div class="leftButtons">
         <ul>
             <li>
+                <div class="menuButton " @click="sluitbox"> Terug</div>
+            </li>
+            <li>
                 <!--<DataFilter></DataFilter>-->
-                <div class="menuButton filterButton" @click="openFilterBox"> Nieuwe filter</div>
+                <div class="menuButton filterButton" @click="openFilterBox"> <v-icon small color="white">add</v-icon> Nieuwe filter</div>
             </li>
             <li>
                 <ExportComponent :toPrint="toPrint"></ExportComponent>
@@ -29,9 +29,7 @@
 
         <div class="rightButtons">
             <ul>
-                <li>
-                    <div class="menuButton " @click="sluitbox"> Terug</div>
-                </li>
+
                 <li>
                     <div class="menuButton " @click="restorePage"> Herstel pagina</div>
 
@@ -52,7 +50,7 @@
                         </template>
 
                         <v-list>
-                            <v-list-tile @click="emitDash">
+                            <v-list-tile @click="emitDash" class="hidden-md-and-down">
                                 <v-list-tile-title >Dashboard</v-list-tile-title>
                             </v-list-tile>
                             <v-list-tile @click="emitList">
@@ -106,6 +104,9 @@
 </script>
 
 <style>
+    .menuContainer{
+        padding: 0;
+    }
     .label{
         display: inline-block;
         font-weight: 400;
@@ -133,7 +134,7 @@
     .menu ul li {
 
         font-weight: 600;
-        margin-right: 10px;
+        margin-left: 10px;
         margin-bottom: 10px;
         min-height: 50px;
         display: inline-block;

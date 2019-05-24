@@ -9,10 +9,8 @@
                         v-on="on"
 
                 >
-                    Exporteer pagina
-
+                    Exporteer pagina <v-icon small color="white">arrow_drop_down</v-icon>
                 </div>
-
             </template>
             <v-list>
                 <v-list-tile @click="handler('.png')">
@@ -82,12 +80,14 @@
                 this.loading = false;
             },      jsonConvert(){
                 //  this.loading = true;
-                if (this.vragen.length < 1) {
+                // const toExport = this.$store.state.configuredSurvey;
+                const toExport = [{title: "vraag1", choices: ["optie 1", "optie2"], answers: ["jaja", "nee meh"]}];
+                if (toExport < 1) {
                     // the array is defined and has at least one element
                     alert("Something went wrong");
                 }
                 else {
-                    this.JSONToCSVConvertor(this.vragen, "ProductSurvey", true);
+                    this.JSONToCSVConvertor(toExport, "ProductSurvey", true);
                 }
             }, JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
                 //If JSONData is not an object then JSON.parse will parse the JSON string in an Object

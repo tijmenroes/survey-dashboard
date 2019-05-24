@@ -22,7 +22,7 @@
                             </v-flex>
 
                             <v-flex shrink >
-                                <div class="menuButton " @click="$store.state.searchActive = false"> Terug</div>
+                                <div class="menuButton " @click="$store.state.searchActive = false"> Sluit</div>
 
                             </v-flex>
 

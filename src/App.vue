@@ -78,7 +78,7 @@ export default {
       pageNumber:0,
       supertof: null,
 
-      buttons: ["Overview", "Individual","Statistics"],
+      buttons: ["Dashboard", "Individual"],
     }
   },methods:{
         logSurvey(id){
@@ -126,7 +126,7 @@ export default {
     },
   created(){
       console.log(this.source);
-      this.logSurvey(24204);
+      this.logSurvey(this.source);
 
     }
  }
@@ -143,6 +143,7 @@ export default {
 
         background: #f7f7f7;
         padding: 15px 20px;
+        padding-top: 50px;
         border-bottom: 1px solid #e3e8e9;
         border-bottom: 1px solid #cecece;
     }
@@ -154,7 +155,7 @@ export default {
       list-style: none;
       margin: 0;
       padding: 0;
-      top: 12px;
+      top: 46px;
   }
   .pageTabs li{
       transition: .2s;
@@ -163,7 +164,7 @@ export default {
       padding: 15px 35px;
       text-decoration: none;
       font-weight: 700;
-      border: 1px solid #dbdbdb;
+
       border: 1px solid transparent;
       border-bottom: none;
       font-size: 14px;
@@ -179,8 +180,6 @@ export default {
       border: 1px solid #dbdbdb;
       border-bottom: none;
   }
-
-
   .app {
     background: white;
   }

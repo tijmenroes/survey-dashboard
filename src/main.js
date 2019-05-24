@@ -4,7 +4,6 @@ import App from './App.vue'
 import VueHtml2Canvas from 'vue-html2canvas';
 import babelPolyfill from 'babel-polyfill';
 import {store} from './store/store';
-//import VueAnalytics from 'vue-analytics'
 Vue.use(VueHtml2Canvas);
 Vue.use(babelPolyfill);
 

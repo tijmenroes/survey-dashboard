@@ -4,11 +4,10 @@
               <MenuComponent @toList="listview" @toDash="dashboardview" :toPrint="$refs"></MenuComponent>
               <FilterBox></FilterBox>
 
-
             <v-container fluid grid-list-xs style="padding: 0 !important">
 
                 <v-layout ref="printMe" row style="background-color: white" wrap v-bind="checkViewWidth">
-                    <v-flex :key="i" xs12 :lg12="chart.isList" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" sm6 :pl-3="!phoneDetected" :pr-3="!phoneDetected" pb-4 v-for="(chart,i) in chartArray.charts"
+                    <v-flex :key="i" xs12 :lg12="chart.isList" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" sm6 md4 :pl-3="!phoneDetected" :pr-3="!phoneDetected" pb-4 v-for="(chart,i) in chartArray.charts"
                             >
                         <v-expansion-panel
                                 expand
@@ -17,7 +16,7 @@
                             <v-expansion-panel-content>
                                 <template v-slot:header>
                                     <div class="text-truncate">
-                                        Q{{i + 1}}. {{reactiveData[i].Title}}
+                                        {{i + 1}}. {{reactiveData[i].Title}}
                                     </div>
                                 </template>
                                 <div class="cardContent" v-if="chart.zerovalues === false">
@@ -52,8 +51,6 @@
                                                     </ul>
                                                     <span v-for="(button,index) in buttons" @click="chart.menuNumber = index" class="optionsTabs ">
 
-
-
                                                     </span>
 
                                                     <div class="uitschuifDiv">
@@ -78,7 +75,7 @@
                                                         </v-layout>
 
 
-                                                    <div v-else class="uitschuifDiv">
+                                                    <div v-else >
                                                         <v-layout row wrap class="optionContent" >
                                                             <v-flex xs6>
                                                                 Labels
@@ -109,7 +106,6 @@
                                                                 Sluit
                                                             </div>
                                                         </div>
-
 
                                                 </div>
                                                 </div>
@@ -383,7 +379,10 @@
                                 series: [{
                                     type: 'pie',
                                     radius: ['45%', '75%'],
-                                    color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
+                                    // color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
+                                    color:["#f64a48", "#58c0eb","#475a64", "#33658A"],
+                                    //F8C7CC
+                                    //FF8360
                                     data: this.reactiveData[key].questionAnswers,
                                     itemStyle: {
                                         borderColor: 'white',
@@ -413,7 +412,7 @@
                             if (this.reactiveData[key].Type > 0) {
                                 const grafiek = chart;
                                 grafiek.chartType = 1;
-
+                                grafiek.radioGroup = 0;
                                 grafiek.yAxis.show = true;
                                 grafiek.xAxis.show = true;
                                 grafiek.series[0].type = 'bar';
@@ -476,7 +475,7 @@
     .optionsTabs{
         position: relative;
         display:inline-block;
-        top: -9px;
+        top: -8px;
         font-weight:500;
         color: #7E8B92;
         padding-left: 4px;
@@ -487,7 +486,7 @@
         font-size: 13px;
         transition: .4s;
         cursor: pointer;
-        border: 1px solid white;
+        border: 1px solid transparent;
         border-bottom: none;
         border-radius: 4px 4px 0 0;
     }
@@ -550,9 +549,11 @@
     }
 
     .uitschuifDiv {
-        transition: .5s;
+        border-top: 1px solid #dbdbdb;
+        border-bottom: 1px solid #dbdbdb;
         background-color: #EEEEEE;
         overflow: hidden;
+        padding-bottom: 10px;
     }
 
 </style>

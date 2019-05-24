@@ -9,8 +9,9 @@
                                         <v-autocomplete
                                                 v-model="model"
                                                 :items="searchItems"
-                                                append-icon="search"
+                                                label="Kies vraag"
                                                 box
+                                                single-line
                                                 background-color="#fff"
                                                 item-text="name"
                                                 item-value="name"
@@ -21,16 +22,14 @@
                     </v-flex>
 
                     <v-flex shrink >
-                        <div class="menuButton " @click="$store.state.filterActive = false"> Sluit</div>
+                        <div class="menuButton " @click="$store.state.filterActive = false"> Sluiten</div>
                     </v-flex>
                 </v-layout>
-
                 </dl>
                 <div v-else>
-                    Q{{filterStatus}}: {{$store.state.configuredSurvey[filterStatus].Title}}
+                    {{filterStatus}}. {{$store.state.configuredSurvey[filterStatus].Title}}
                     <div class="mt-2">
                         <v-layout column row>
-
 
                         <v-flex xs6  lg8 v-for="(keuzes, index) in $store.state.configuredSurvey[filterStatus].questionChoices">
                             <v-checkbox
@@ -48,7 +47,7 @@
                         </li>
                         <li>
                             <div class="backButton menuButton"  @click="discardFilter">
-                                Terug
+                                Sluit
                             </div>
                         </li>
                     </ul>
@@ -65,10 +64,10 @@
 
                 <div :key="index"
                      class="chippie" v-for="(filter,index)  in $store.state.filters">
-                    <span @click="editFilter(filter.Question, filter.Answer)">Q{{filter.Question}}: {{filter.Answer.toString()}}</span>
+                    <span @click="editFilter(filter.Code[0].q, filter.Answer)">Q{{filter.Question}}: {{filter.Answer.toString()}}</span>
                     <v-icon right small @click="delFilter(index)"> close</v-icon>
                 </div>
-            {{$store.state.filters}}
+
             </div>
         </div>
     </div>
@@ -123,8 +122,9 @@
                 this.$store.state.filterActive = false;
             },
             FilterConfig(answer, question) {
-                const filterExists = this.filterExists(answer, question);
-                console.log(filterExists);
+                const get = this.filterExists(answer, question);
+                const filterExists = get.exists;
+
                 if (answer.length === 0) {
                     alert('Selecteer een filter!');
                 } else {
@@ -135,7 +135,8 @@
                     } else if (filterExists === "bestaat") {
                         // this.$store.commit('delFilter', question);
                         console.log('jaja hij doet het hoor');
-                        this.$store.commit('delFilter', question);
+
+                        this.$store.commit('delFilter', get.number);
                         this.$store.commit('addFilter', {answer, question});
                         this.$store.commit('ConfigureAnswers');
                     } else {
@@ -146,6 +147,7 @@
             filterExists(answer, question) {
                 // console.log(answer);
                 console.log(question);
+                let outcome = {exists: '', number: null};
                 let number = null;
                 const filters = this.$store.state.filters;
                 for(let filter in filters){
@@ -153,32 +155,23 @@
                         if(filters[filter].Code[0].q === question){
                             console.log('dat is m');
                             number = filter;
+                            outcome.number = filter;
                         }
                     }
                 }
                 if(number === null){
-                    return false
+                    outcome.exists = false;
                 } else {
                     if (filters[number].Code[0].a === answer) {
-                        return true;
+
+                        outcome.exists = true;
                     } else {
-                        return "bestaat";
+                        outcome.exists = "bestaat";
+
                     }
                 }
-                //Meegeven waar die filter staat.
-
-                // if (typeof filters[filter] !== 'undefined') {
-                //
-                //     const number = filters[filter].Code[0].q;
-                //     if (filters[number].Code[0].a === answer) {
-                //         return true;
-                //     } else {
-                //         return "bestaat";
-                //     }
-                //
-                // } else {
-                //     return false
-                // }
+                console.log(outcome);
+                return outcome;
 
             },
             delFilter(number) {
@@ -188,11 +181,14 @@
         }, created() {
             const array = [];
             const array2 = [];
-
+            console.log(this.$store.state.configuredSurvey);
             for (let vraag in this.$store.state.configuredSurvey) {
+                if(this.$store.state.configuredSurvey[vraag].Type  !== 5) {
 
-                array.push({"questionNr": vraag, choices: []});
-                array2.push(this.$store.state.configuredSurvey[vraag].Title)
+
+                    array.push({"questionNr": vraag, choices: []});
+                    array2.push(this.$store.state.configuredSurvey[vraag].Title)
+                }
             }
             this.searchItems = array2;
 

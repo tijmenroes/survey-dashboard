@@ -13,6 +13,9 @@
 <div class="leftButtons">
         <ul>
             <li>
+                <div class="menuButton " @click="sluitbox"> Terug</div>
+            </li>
+            <li>
                 <!--<DataFilter></DataFilter>-->
                 <div class="menuButton " @click="exportEmit"> Exporteren</div>
             </li>
@@ -29,15 +32,13 @@
 
         <div class="rightButtons">
             <ul>
-                <li>
-                    <div class="menuButton " @click="sluitbox"> Terug</div>
-                </li>
+
                 <li>
                     <div class="menuButton " @click="restorePage"> Herstel pagina</div>
 
                 </li>
                 <li>
-                    <div class="menuButton " @click="searchItems"> Zoeken</div>
+                    <div class="menuButton filterButton" @click="searchItems"> Zoeken</div>
                 </li>
             </ul>
 
@@ -67,7 +68,7 @@
                 //this.$emit('resetPage');
             },
             searchItems(){
-                this.$store.state.searchActive = true;
+                this.$store.state.searchActive = !this.$store.state.searchActive;
             },
             sluitbox(){
                 this.$store.state.searchActive = false;
