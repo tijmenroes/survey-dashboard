@@ -19,7 +19,6 @@ new Vue({
   },
   beforeMount(){
     this.source = this.$el.attributes['source'].value;
-
   },
   components:{App},
   template: '<App :source="source"/>',

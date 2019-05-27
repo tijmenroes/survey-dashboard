@@ -60,9 +60,9 @@
 
 <script>
 
-import Overview from "./views/Overview.vue";
+import Overview from "./views/Dashboard.vue";
 import SurveyView from "./views/SurveyView.vue";
-
+import Individual from "./views/Individual.vue";
 import axios from 'axios'
 
 export default {
@@ -70,14 +70,12 @@ export default {
   props: ['source'],
   components: {
     Overview, SurveyView,
-    Individual: () => import('./views/Individual.vue'),
+    Individual
   },
 
   data () {
     return {
       pageNumber:0,
-      supertof: null,
-
       buttons: ["Dashboard", "Individual"],
     }
   },methods:{
@@ -172,6 +170,14 @@ export default {
       background: 0 0;
       color: #353535;
       border-radius: 4px 4px 0 0;
+      cursor: pointer;
+      -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+      -khtml-user-select: none; /* Konqueror HTML */
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+      user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
   }
   .pageTabs .active, .pageTabs li:hover {
       transition: .2s;

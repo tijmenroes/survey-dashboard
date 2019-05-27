@@ -1,34 +1,43 @@
 <template>
     <div>
           <div>
-              <MenuComponent @toList="listview" @toDash="dashboardview" :toPrint="$refs"></MenuComponent>
+              <MenuComponent
+                             @toDash="changeRow(-1)"
+                             @one-per-row="changeRow(0)"
+                             @two-per-row="changeRow(1)"
+                             @three-per-row="changeRow(2)"
+                             @printDashboard="testExport(-1)"></MenuComponent>
               <FilterBox></FilterBox>
-
             <v-container fluid grid-list-xs style="padding: 0 !important">
-
-                <v-layout ref="printMe" row style="background-color: white" wrap v-bind="checkViewWidth">
-                    <v-flex :key="i" xs12 :lg12="chart.isList" :lg3="!chart.bigDiv" :lg6="chart.bigDiv" sm6 md4 :pl-3="!phoneDetected" :pr-3="!phoneDetected" pb-4 v-for="(chart,i) in chartArray.charts"
-                            >
+                <v-layout ref="toPrint" row style="background-color: white" wrap v-bind="checkViewWidth">
+                    <v-flex :key="i" xs12
+                            :lg12="chart.oneperRow"  :md12="chart.oneperRow" :sm12="chart.oneperRow"
+                            :lg6="chart.twoperRow"  :md6="chart.twoperRow"
+                            :lg4="chart.threeperRow"  :sm4="chart.threeperRow"
+                            lg3 sm6 md4
+                            :pl-3="!phoneDetected" :pr-3="!phoneDetected" pb-4 v-for="(chart,i) in chartArray.charts"
+                            :ref="i"  >
+                        <div >
+                            <!--:lg12="chart.isList" lg3 sm6 md4-->
                         <v-expansion-panel
                                 expand
                                 v-model="panel[i]"
                         >
-                            <v-expansion-panel-content>
+                            <v-expansion-panel-content :style="exportStyle"  >
                                 <template v-slot:header>
                                     <div class="text-truncate">
                                         {{i + 1}}. {{reactiveData[i].Title}}
                                     </div>
                                 </template>
                                 <div class="cardContent" v-if="chart.zerovalues === false">
-                                    <div v-if="chart.chartType > 0">
-
+                                    <div v-if="chart.chartType !==  5">
 
                                         <v-container v-if="chart.menuShow === false">
                                             Antwoorden: {{reactiveData[i].SumAnswers}}
                                             <div style="float: right">
-                                                <!--<div class="chartbutton" >-->
-                                                    <!--Exporteren-->
-                                                <!--</div>-->
+                                                <div class="chartbutton" @click="testExport(i)" >
+                                                    Exporteren
+                                                </div>
                                                 <div class="chartbutton" @click="chart.menuShow = true">
                                                     Aanpassen
                                                 </div>
@@ -114,7 +123,8 @@
                                     </div>
                                     <v-chart
                                             :options="chartArray.charts[i]" autoresize
-                                            class="bigboy"></v-chart>
+                                            class="bigboy"
+                                            ></v-chart>
                                     </div>
                                     <div v-else>
                                         <v-container v-if="chart.menuShow === false">
@@ -136,6 +146,7 @@
                                 </div>
                             </v-expansion-panel-content>
                         </v-expansion-panel>
+                        </div>
                     </v-flex>
                 </v-layout>
             </v-container>
@@ -145,7 +156,6 @@
 </template>
 
 <script>
-
     import ECharts from 'vue-echarts'
     import 'echarts/lib/chart/bar'
     import 'echarts/lib/chart/pie'
@@ -154,21 +164,16 @@
     import 'echarts/lib/component/toolbox'
     import 'echarts/lib/component/legend'
     import 'echarts/lib/component/markLine'
-    import FilterBox from '../components/FilterBox.vue'
-    import MenuComponent from '../components/MenuComponent.vue'
-
-
+    import FilterBox from '../components/dbFilterBox.vue'
+    import MenuComponent from '../components/dbMenu.vue'
 
     export default {
-
         name: 'Overview',
         components: {
             FilterBox,
             MenuComponent,
-
             'v-chart': ECharts,
         },
-
         data() {
             return {
                 phoneDetected: false,
@@ -194,25 +199,63 @@
                 },
                 panel: [],
                 qData: [],
+                exportStyle: "border: none" ,
                 menuNumber: 0,
                 reactiveData: this.$store.state.configuredSurvey
             }
         },
         methods: {
+            testExport(number){
+                const vm = this;
+                this.exportStyle =  "border: 0.1rem solid rgba(0,0,0,0.23) !important;";
+                setTimeout(function(){
+                    vm.exportAsImg(number);
+                    vm.exportStyle =  "border: none";
+                }, 1);
 
-            listview(){
-              for(let key in this.chartArray.charts){
-                  this.chartArray.charts[key].isList = true;
-                 }
-              },
-                dashboardview(){
-                    for(let key in this.chartArray.charts){
-                        this.chartArray.charts[key].isList = false;
+            }, exportAsImg(number){
+                const options = {
+                    type: 'dataURL',
+                    backgroundColor: null,
+                };
+                if(number !== -1){
+                    this.$html2canvas(this.$refs[number][0], options).then(function (canvas) {
+                        saveAs(canvas, 'Overview_ProductSurvey' + '.png');
+                    });
+
+                } else {
+                    this.$html2canvas(this.$refs.toPrint, options).then(function (canvas) {
+                        saveAs(canvas, 'Overview_ProductSurvey' + '.png');
+                    });
+                }
+                function saveAs(uri, filename) {
+                    var link = document.createElement('a');
+                    if (typeof link.download === 'string') {
+                        link.href = uri;
+                        link.download = filename;
+                        //Firefox requires the link to be in the body
+                        document.body.appendChild(link);
+                        //simulate click
+                        link.click();
+                        //remove the link when done
+                        document.body.removeChild(link);
+                    } else {
+                        window.open(uri);
                     }
-                },
+                }
+            },
+             changeRow(key){
+                let array = [false, false, false];
+                if(key > -1) {
+                    array[key] = true;
+                }
+                for(let key in this.chartArray.charts){
+                    this.chartArray.charts[key].oneperRow = array[0];
+                    this.chartArray.charts[key].twoperRow = array[1];
+                    this.chartArray.charts[key].threeperRow = array[2];
+                }
+            },
             AddMiddleLine(index){
-
-
                 if(this.chartArray.charts[index].mediumShow){
                     this.chartArray.charts[index].series[0].markLine.data = [{"type": "average"}]
                 } else {
@@ -220,7 +263,6 @@
                 }
             },
             displayHandler(nummer, index) {
-
                 if (nummer === 0) {
                     this.chartArray.charts[index].series[0].label.show = false;
                 } else if (nummer === 1) {
@@ -235,27 +277,30 @@
             toLine(graph, option) {
 
                 const grafiek = this.chartArray.charts[graph];
+
                 this.AddMiddleLine(graph);
                 //Reset Graph
-
                 grafiek.chartType = option;
                 grafiek.yAxis.show = true;
                 grafiek.xAxis.show = true;
                 grafiek.xAxis.type = 'category';
                 grafiek.yAxis.type = 'value';
-               // grafiek.series[0].type = 'line';
+                grafiek.series[0].type = 'line';
+
                 if (grafiek.series[0].label.formatter === "{d}%" && option < 3) {
                     grafiek.radioGroup = 0;
                     grafiek.series[0].label.show = false;
                 }
-
                 if (option === 0) {
 
+                    console.log('wauw');
+                    // grafiek.series[0].type = 'line';
+                    //  grafiek.series[0].type = 'line';
+                    //  grafiek.series[0].type = 'bar';
+                    //  grafiek.series[0].itemStyle.borderWidth = 0;
 
-                   // grafiek.series[0].type = 'line';
-                    grafiek.series[0].type = 'line';
-
-                } else if (option === 1) {
+                }
+              else if (option === 1) {
 
                     grafiek.series[0].type = 'bar';
                     grafiek.series[0].itemStyle.borderWidth = 0;
@@ -287,21 +332,15 @@
             },
 
             drawCharts() {
-
-
                 for (let chart in this.chartArray.charts) {
                     if (this.chartArray.charts[chart].chartType > 0) {
-                        //       if(this.chartArray.charts)
                         this.chartArray.charts[chart].series[0].data = this.reactiveData[chart].questionAnswers;
-
                         let allowed = 0;
                         for (let optie in this.reactiveData[chart].questionAnswers) {
-
                             if (this.reactiveData[chart].questionAnswers[optie].value !== null) {
                                 allowed++;
                             }
                         }
-
                         if (allowed === 0) {
                             this.chartArray.charts[chart].zerovalues = true;
                         } else {
@@ -309,18 +348,13 @@
                         }
                     }else {
                          //Wanneer het een tekstvak is
-
                         const answerArray = [];
                         for(let answer in this.reactiveData[chart].questionAnswers){
                             if (this.reactiveData[chart].questionAnswers[answer] != null) {
-
                                 answerArray.push(this.reactiveData[chart].questionAnswers[answer]);
                             }
-
-                            this.chartArray.charts[chart].answers = answerArray;
-
+                           this.chartArray.charts[chart].answers = answerArray;
                         }
-
                     }
                 }
             },
@@ -330,23 +364,22 @@
                 };
                 for (let key in this.reactiveData) {
                     if(this.reactiveData[key].Type === 5){
-                        console.log('wowzers');
                         let answerArray = [];
                         for(let answer in this.reactiveData[key].questionAnswers){
                             if (this.reactiveData[key].questionAnswers[answer] != null) {
-
                                 answerArray.push(this.reactiveData[key].questionAnswers[answer]);
                             }
                         }
                         const chart = {
-                            bigDiv: false,
-                            isList: false,
+                            oneperRow: false,
+                            twoperRow: false,
+                            threeperRow: false,
                             zerovalues: false,
                             menuShow: false,
                             mediumShow: false,
                             menuNumber: 1,
                             radioGroup: 2,
-                            chartType: 0,
+                            chartType: 5,
                             answers: answerArray
                         };
                         this.chartArray.charts.push(chart)
@@ -417,8 +450,7 @@
                                 grafiek.xAxis.show = true;
                                 grafiek.series[0].type = 'bar';
                                 grafiek.series[0].itemStyle.borderWidth = 0;
-                                if (this.reactiveData[key].Type > 1) {
-                                }
+
                             }
                             this.chartArray.charts.push(chart)
                         } else {
@@ -479,7 +511,6 @@
         font-weight:500;
         color: #7E8B92;
         padding-left: 4px;
-
     }
     .normaltab {
         padding: 11px;
@@ -493,16 +524,13 @@
     .normaltab:hover {
         border-color: #dbdbdb;
         background:#EEEEEE;
-
         color: #475963;
-
     }
     .tabActive {
         color: #475963;
         background:#EEEEEE;
         border: 1px solid #dbdbdb;
         border-bottom: none;
-
      }
     .chartbutton {
         transition: .2s;
@@ -510,11 +538,13 @@
         background: #455a64;
         padding: 5px 15px;
         color: white;
-        font-size: 12px;
+        font-size: 11px;
         border-radius: 10px;
-        margin-left: 5px;
-        float:right;
-        margin-top: 5px;
+        margin-left: 10px;
+        font-weight: 500;
+        float: right;
+        letter-spacing: 0.015rem;
+        margin-top: 0px;
     }
     .backbutton {
         float: left;
@@ -524,30 +554,23 @@
     }
     .chartbutton:hover{
         background: #37474f;
-        /*border: 2px solid #37474f;*/
     }
     .textCard{
         max-height: 400px;
         overflow: auto;
         line-height: 35px;
         padding: 0px;
-
-
     }
     .textCard li {
         padding: 10px;
-
         list-style:none;
-
     }
    .textCard li:nth-child( odd ) {
         background: #fafafa;
     }
-
     .bigboy {
         width: 100%;
     }
-
     .uitschuifDiv {
         border-top: 1px solid #dbdbdb;
         border-bottom: 1px solid #dbdbdb;

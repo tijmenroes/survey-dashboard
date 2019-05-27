@@ -5,7 +5,7 @@
        <div class="menu">
            <v-layout row wrap>
 <v-flex align-self-baseline>
-<!--Toch wel per ding een flex???!?!-->
+
 
 <div class="leftButtons">
         <ul>
@@ -17,15 +17,40 @@
                 <div class="menuButton filterButton" @click="openFilterBox"> <v-icon small color="white">add</v-icon> Nieuwe filter</div>
             </li>
             <li>
-                <ExportComponent :toPrint="toPrint"></ExportComponent>
+                <div class="text-xs-center">
+
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on }">
+                            <div
+                                    color="#38C1A7"
+                                    class="menuButton text-none"
+                                    v-on="on"
+                            >
+                                Exporteer pagina <v-icon small color="white">
+                                arrow_drop_down
+                            </v-icon>
+                            </div>
+                        </template>
+                        <v-list>
+                            <v-list-tile @click="exportImg('.png')">
+                                <v-list-tile-title>.png</v-list-tile-title>
+                            </v-list-tile>
+
+                            <v-list-tile @click="exportCSV()">
+                                <v-list-tile-title>.csv</v-list-tile-title>
+                            </v-list-tile>
+                        </v-list>
+                    </v-menu>
+                </div>
+
+
             </li>
         </ul>
 
 
 </div>
 </v-flex>
-
-           <v-flex>
+        <v-flex>
 
         <div class="rightButtons">
             <ul>
@@ -45,16 +70,22 @@
                                     class="selectButton"
                                     v-on="on"
                             >
-                                Dashboard
+                                {{weergaveStatus}}
                             </div>
                         </template>
 
                         <v-list>
                             <v-list-tile @click="emitDash" class="hidden-md-and-down">
-                                <v-list-tile-title >Dashboard</v-list-tile-title>
+                                <v-list-tile-title >Automatisch</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile @click="emitList">
-                                <v-list-tile-title>List</v-list-tile-title>
+                            <v-list-tile @click="$emit('three-per-row'); weergaveStatus = '3 per rij'">
+                                <v-list-tile-title>3 per rij</v-list-tile-title>
+                            </v-list-tile>
+                            <v-list-tile @click="$emit('two-per-row'); weergaveStatus = '2 per rij'">
+                                <v-list-tile-title>2 per rij</v-list-tile-title>
+                            </v-list-tile>
+                            <v-list-tile @click="$emit('one-per-row'); weergaveStatus = '1 per rij'">
+                                <v-list-tile-title>1 per rij</v-list-tile-title>
                             </v-list-tile>
                         </v-list>
                     </v-menu>
@@ -72,16 +103,18 @@
 </template>
 
 <script>
-
-    import ExportComponent from './ExportComponent.vue'
-
     export default {
         name: "MenuComponent",
         props: ['toPrint'],
-        components: {
-          ExportComponent
+        data(){
+            return{
+                weergaveStatus: "Automatisch"
+            }
         },
         methods:{
+            exportCSV(){
+                this.$store.commit('exportCSV', this.$store.state.individualData);
+            },
             restorePage(){
                 this.$store.commit('resetData');
                 this.$store.commit('ConfigureAnswers');
@@ -94,10 +127,16 @@
                 this.$store.state.filterActive = false;
             },
             emitDash(){
+                this.weergaveStatus = "Automatisch";
                 this.$emit('toDash');
             },
             emitList(){
+                this.weergaveStatus = "1 per rij";
                 this.$emit('toList');
+            },
+            exportImg(){
+                this.$emit('printDashboard');
+
             }
         }
     }
@@ -157,6 +196,13 @@
         border-radius: 22px;
         margin-right: 10px;
         margin-bottom: 10px;
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
 
     }
     .leftButtons  {

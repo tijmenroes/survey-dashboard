@@ -13,8 +13,6 @@
                                                 box
                                                 single-line
                                                 background-color="#fff"
-                                                item-text="name"
-                                                item-value="name"
                                                 class="choiceMenu"
                                                 dense
                                         >
@@ -27,7 +25,7 @@
                 </v-layout>
                 </dl>
                 <div v-else>
-                    {{filterStatus}}. {{$store.state.configuredSurvey[filterStatus].Title}}
+                    {{+filterStatus + 1}}. {{$store.state.configuredSurvey[filterStatus].Title}}
                     <div class="mt-2">
                         <v-layout column row>
 
@@ -62,11 +60,32 @@
 
             <div class="filterList">
 
-                <div :key="index"
-                     class="chippie" v-for="(filter,index)  in $store.state.filters">
-                    <span @click="editFilter(filter.Code[0].q, filter.Answer)">Q{{filter.Question}}: {{filter.Answer.toString()}}</span>
-                    <v-icon right small @click="delFilter(index)"> close</v-icon>
-                </div>
+
+                <v-menu offset-y v-for="(filter,index)  in $store.state.filters">
+                    <template v-slot:activator="{ on }" >
+                        <div
+                                color="#38C1A7"
+                                class="chippie "
+                                v-on="on"
+                        >
+                            Q{{filter.Question}}: {{filter.Answer.toString()}}
+
+
+                            <v-icon   small color="455a64" class="chipIcon">
+                            more_vert
+                        </v-icon>
+                        </div>
+                    </template>
+                    <v-list>
+                        <v-list-tile @click="editFilter(filter.Code[0].q, filter.Answer)">
+                            <v-list-tile-title>Filter aanpassen</v-list-tile-title>
+                        </v-list-tile>
+
+                        <v-list-tile @click="delFilter(index)">
+                            <v-list-tile-title style="color: #f64a48">Filter verwijderen</v-list-tile-title>
+                        </v-list-tile>
+                    </v-list>
+                </v-menu>
 
             </div>
         </div>
@@ -76,7 +95,6 @@
 
 <script>
     export default {
-        name: "FilterBox",
         watch:{
           model(){
 
@@ -97,7 +115,7 @@
                 filterStatus: 0,
                 selectedChoice: [],
                 filterVModel: [],
-                model: ["hai"],
+                model: [],
             }
         },
         methods: {
@@ -133,9 +151,6 @@
                         this.$store.commit('ConfigureAnswers');
                         console.log("Filter send to vuex");
                     } else if (filterExists === "bestaat") {
-                        // this.$store.commit('delFilter', question);
-                        console.log('jaja hij doet het hoor');
-
                         this.$store.commit('delFilter', get.number);
                         this.$store.commit('addFilter', {answer, question});
                         this.$store.commit('ConfigureAnswers');
@@ -175,6 +190,7 @@
 
             },
             delFilter(number) {
+                this.filterVModel[number].choices = [];
                 this.$store.commit('delFilter', number);
                 this.$store.commit('ConfigureAnswers', number);
             }
@@ -204,6 +220,10 @@
     }
     li{
         display:inline-block;
+    }
+    .chipIcon {
+     font-size: 18px !important;
+
     }
     .saveButton {
         padding: 8px 25px;
@@ -241,7 +261,6 @@
         border-radius: 4px;
         -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
         box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
-
         margin-bottom: 30px;
     }
     .filterList {
@@ -258,11 +277,20 @@
         letter-spacing: 1px;
     }
     .chippie{
+        cursor:pointer !important;
         background: #fff;
         display: inline-block;
         border-radius: 22px;
         padding: 8px 20px;
         border: 2px solid #00bfa5 !important;
+        transition: .3s;
+    }
+    .chippie:hover {
+        background: #00bfa5;
+        color: white;
+    }
+    .chippie:hover .chipIcon{
+        color: white !important;
     }
 
     form {

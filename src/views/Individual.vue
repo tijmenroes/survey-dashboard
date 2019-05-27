@@ -1,8 +1,8 @@
 <template>
     <div>
 
-        <MenuIndividual @export="jsonConvert"></MenuIndividual>
-           <v-expand-transition >
+        <MenuIndividual @export="exportHandler" :amountSelected="selected.length"></MenuIndividual>
+           <v-expand-transition>
             <div class="boxContainer" v-show="$store.state.searchActive">
                 <v-container fluid class="boxContent">
                     <dl class="inputje">
@@ -20,18 +20,12 @@
                                         background-color="#fff"
                                 ></v-text-field>
                             </v-flex>
-
-                            <v-flex shrink >
-                                <div class="menuButton " @click="$store.state.searchActive = false"> Sluit</div>
-
+                            <v-flex shrink>
+                                <div class="menuButton " @click="sluitBox()"> Sluit</div>
                             </v-flex>
-
                         </v-layout>
-
                     </dl>
-
                 </v-container>
-
             </div>
         </v-expand-transition>
         <v-spacer></v-spacer>
@@ -39,10 +33,8 @@
         <v-container fluid grid-list-xs style="padding: 0 !important;">
             <v-layout wrap>
 <v-flex xs12>
-
-
                     <v-card>
-                                  <v-data-table
+                                <v-data-table
                                 v-model="selected"
                                 :headers="headers"
                                 no-results-text="Voor deze zoekopdracht zijn geen reacties gevonden"
@@ -52,7 +44,6 @@
                                 :search="search"
                                 :pagination.sync="pagination"
                                 :rows-per-page-text="rowsperpage"
-
                         >
                             <template slot="headerCell" slot-scope="props">
                                 <v-tooltip bottom>
@@ -61,15 +52,12 @@
             {{ props.header.text }}
           </span>
                                     </template>
-                                    <span >
+                                    <span>
           {{ props.header.hover }}
         </span>
                                 </v-tooltip>
                             </template>
-
                             <template slot="items" slot-scope="props">
-
-
                                 <td >
                                     <v-checkbox
                                             v-model="props.selected"
@@ -78,17 +66,15 @@
                                             color="#455A64"
                                     ></v-checkbox>
                                 </td>
-                                <td v-for="header in headers" :key="props.item[header]" @click="openDialog(props.item)" class="litty">
+                                <td v-for="header in headers" :key="props.item[header]" @click="openDialog(props.item)">
                                     {{props.item[header.value]}}
                                 </td>
-
                             </template>
                         </v-data-table>
                     </v-card>
 </v-flex>
             </v-layout>
-            <br>
-            <v-btn @click="jsonConvert">Export to Excel</v-btn>
+
             <v-dialog
                     v-model="dialog"
                     width="600">
@@ -97,13 +83,10 @@
                         Antwoorden
                     </v-card-title>
                     <v-card-text>
-
-                        <div v-for="headerke in headers"><p>
-
-                        <strong>{{headerke.text}}</strong>
-
+                        <div v-for="key in headers"><p>
+                        <strong>{{key.text}}</strong>
                             <br>
-                                {{dialogText[headerke.value]}}
+                                {{dialogText[key.value]}}
                             </p></div>
                     </v-card-text>
                     <v-divider></v-divider>
@@ -113,8 +96,7 @@
     </div>
 </template>
 <script>
-    import MenuIndividual from '../components/MenuIndividual.vue'
-    import searchBox from '../components/FilterBoxIndiv.vue'
+    import MenuIndividual from '../components/IndivMenu.vue'
     export default {
         created() {
             this.configureHeaders();
@@ -122,17 +104,14 @@
         },
         components:{
             MenuIndividual,
-            searchBox
         },
         data() {
             return {
-
                 dialog: false,
                 dialogText: '',
                 pagination: {
                     descending: true,
                     rowsPerPage: 10,
-
                     sortBy: "id",
                     page: 1,
                 },
@@ -145,6 +124,10 @@
 
             }
         }, methods: {
+            sluitBox(){
+              this.$store.state.searchActive = false;
+              this.search = '';
+            },
             openDialog(info) {
                 this.dialog = !this.dialog;
                 this.dialogText = info;
@@ -159,10 +142,8 @@
                     const headerText = text;
                     var number = 'q' + question.toString();
                     if(text.length > 35){
-
                         text = text.slice(0,32);
                         text = text + "...";
-                        console.log(text);
                     }
                     headerArray.push({text: text, value: number, hover: headerText})
                 }
@@ -192,10 +173,8 @@
                                 for(let keuze in users[user].answers[answer]){
                                     answerArray.push( " " +users[user].answers[answer][keuze].toString() )
                                 }
-
                                 const antwoord = 'q' + answer.toString();
                                 userArray[antwoord] = answerArray.toString()
-
                             }else {
                             const antwoord = 'q' + answer.toString();
                             userArray[antwoord] = users[user].answers[answer]
@@ -203,103 +182,33 @@
                         }
                     }
                     this.rows.push(userArray);
+
                 }
+                this.$store.state.individualData = this.rows;
+
             },
             checkTime(i) {
-            if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+            if (i < 10) {i = "0" + i}
             return i;
             },
-            jsonConvert() {
-
-                if (this.selected.length < 1) {
-                    // the array is defined and has at least one element
-                    alert("Select answers!");
+            exportHandler(value){
+                if(value === 1){
+                    this.$store.commit('exportCSV', this.rows);
                 } else {
-                    this.JSONToCSVConvertor(this.selected, "ProductSurvey", true);
-                }
-            }, JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
-                //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
-                var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
-
-                var CSV = 'sep=,' + '\r\n\n';
-
-                //This condition will generate the Label/Header
-                if (ShowLabel) {
-                    var row = "";
-
-                    //This loop will extract the label from 1st index of on array
-                    for (var index in arrData[0]) {
-
-                        //Now convert each value to string and comma-seprated
-                        row += index + ',';
+                    if (this.selected.length < 1) {
+                        alert("Select answers!");
+                    } else {
+                        this.$store.commit('exportCSV', this.selected);
                     }
-                    console.log(row);
-                    row = row.slice(0, -1);
-
-                    //append Label row with line break
-                    CSV += row + '\r\n';
-                    console.log(CSV);
                 }
-
-                //1st loop is to extract each row
-                for (var i = 0; i < arrData.length; i++) {
-                    var row = "";
-
-                    //2nd loop will extract each column and convert it in string comma-seprated
-                    for (var index in arrData[i]) {
-                        row += '"' + arrData[i][index] + '",';
-                    }
-
-                    row.slice(0, row.length - 1);
-
-                    //add a line break after each row
-                    CSV += row + '\r\n';
-                    console.log(CSV);
-                }
-
-                if (CSV == '') {
-                    alert("Invalid data");
-                    return;
-                }
-
-                //Generate a file name
-                var fileName = "Report_";
-                //this will remove the blank-spaces from the title and replace it with an underscore
-                fileName += ReportTitle.replace(/ /g, "_");
-
-                //Initialize file format you want csv or xls
-                var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
-
-                // Now the little tricky part.
-                // you can use either>> window.open(uri);
-                // but this will not work in some browsers
-                // or you will not get the correct file extension
-
-                //this trick will generate a temp <a /> tag
-                var link = document.createElement("a");
-                link.href = uri;
-
-                //set the visibility hidden so it will not effect on your web-layout
-                link.style = "visibility:hidden";
-                link.download = fileName + ".csv";
-
-                //this part will append the anchor tag and remove it after automatic click
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
             },
-        }, watch: {
-            // users() {
-            //   //  this.configureRows();
-            // },
+
+         }
         }
-    }
 </script>
 
 <style scoped>
- .litty:hover{
-     /*background-color:blue!important;;*/
- }
+
 table.v-table tbody tr:nth-child(even) td {
    background: #fafafa;
 }
@@ -331,20 +240,11 @@ table.v-table tbody tr:hover{
     border-radius: 4px;
     -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
     box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
-
     margin-bottom: 30px;
 }
 
 form {
     width: 100%;
+}
 
-}
-.keuzeButton{
-    background: #fff;
-    border: 1px solid #dfdfdf;
-    border-radius: 6px;
-    padding: 4px;
-    min-height: 40px;
-    color: #3e3e3e;
-}
 </style>
