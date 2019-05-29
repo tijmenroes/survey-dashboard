@@ -1,13 +1,15 @@
 <template>
     <div>
           <div>
+              <div style="padding:0px 16px">
               <MenuComponent
                              @toDash="changeRow(-1)"
                              @one-per-row="changeRow(0)"
                              @two-per-row="changeRow(1)"
                              @three-per-row="changeRow(2)"
-                             @printDashboard="testExport(-1)"></MenuComponent>
+                             @printDashboard="exportDashboard(-1)"></MenuComponent>
               <FilterBox></FilterBox>
+              </div>
             <v-container fluid grid-list-xs style="padding: 0 !important">
                 <v-layout ref="toPrint" row style="background-color: white" wrap v-bind="checkViewWidth">
                     <v-flex :key="i" xs12
@@ -16,14 +18,13 @@
                             :lg4="chart.threeperRow"  :sm4="chart.threeperRow"
                             lg3 sm6 md4
                             :pl-3="!phoneDetected" :pr-3="!phoneDetected" pb-4 v-for="(chart,i) in chartArray.charts"
-                            :ref="i"  >
+                            :ref="i" >
                         <div >
-                            <!--:lg12="chart.isList" lg3 sm6 md4-->
                         <v-expansion-panel
                                 expand
                                 v-model="panel[i]"
                         >
-                            <v-expansion-panel-content :style="exportStyle"  >
+                            <v-expansion-panel-content :style="exportStyle">
                                 <template v-slot:header>
                                     <div class="text-truncate">
                                         {{i + 1}}. {{reactiveData[i].Title}}
@@ -35,7 +36,7 @@
                                         <v-container v-if="chart.menuShow === false">
                                             Antwoorden: {{reactiveData[i].SumAnswers}}
                                             <div style="float: right">
-                                                <div class="chartbutton" @click="testExport(i)" >
+                                                <div class="chartbutton" @click="exportDashboard(i)" >
                                                     Exporteren
                                                 </div>
                                                 <div class="chartbutton" @click="chart.menuShow = true">
@@ -63,26 +64,26 @@
                                                     </span>
 
                                                     <div class="uitschuifDiv">
-                                                        <v-layout row wrap v-if="chart.menuNumber === 0">
-                                                            <v-flex lg2 md4 v-for="(option, optionIndex) in options"
-                                                                    xs3>
+                                                        <v-layout row wrap v-if="chart.menuNumber === 0" class="optionContent">
+                                                            <v-flex v-for="(option, optionIndex) in options" class="graphButtonContainer">
                                                                 <v-tooltip bottom>
                                                                     <template v-slot:activator="{ on }">
-                                                                        <v-btn @click="toLine(i, optionIndex)" fab flat
+                                                                        <div @click="changeGraph(i, optionIndex)" class="graphButton graphButtonActive"  v-if="chart.chartType === optionIndex"
                                                                                v-on="on">
-                                                                            <v-icon color="red"
-                                                                                    v-if="chart.chartType === optionIndex">{{option.icon}}
+                                                                            <v-icon color="white" :style="{transform: option.extraCSS}"
+                                                                                   >{{option.icon}}
                                                                             </v-icon>
-                                                                            <v-icon color="#707171" v-else>
+                                                                        </div>
+                                                                        <div v-else @click="changeGraph(i, optionIndex)" class="graphButton" v-on="on">
+                                                                            <v-icon color="#707171" :style="{transform: option.extraCSS}">
                                                                                 {{option.icon}}
                                                                             </v-icon>
-                                                                        </v-btn>
+                                                                        </div>
                                                                     </template>
                                                                     <span>{{option.text}}</span>
                                                                 </v-tooltip>
                                                             </v-flex>
                                                         </v-layout>
-
 
                                                     <div v-else >
                                                         <v-layout row wrap class="optionContent" >
@@ -98,7 +99,6 @@
                                                                              v-else disabled></v-radio>
                                                                 </v-radio-group>
                                                             </v-flex>
-
                                                                 <v-flex xs6>
                                                                     Weergeven
                                                                     <v-checkbox style="margin-top: 0 !important;"
@@ -106,8 +106,6 @@
                                                                     <v-checkbox style="margin-top: 0 !important;"
                                                                                 v-model="chart.mediumShow" color="#455A64" v-else label="Gemiddelde" disabled></v-checkbox>
                                                                 </v-flex>
-
-
                                                         </v-layout>
                                                     </div>
                                                         <div class="backButtonContainer">
@@ -123,7 +121,7 @@
                                     </div>
                                     <v-chart
                                             :options="chartArray.charts[i]" autoresize
-                                            class="bigboy"
+                                            class="chartContainer"
                                             ></v-chart>
                                     </div>
                                     <div v-else>
@@ -177,13 +175,14 @@
         data() {
             return {
                 phoneDetected: false,
-                options: [{"icon": "show_chart", "text": "Lijngrafiek"}, {
+                options: [{"icon": "show_chart", "text": "Lijngrafiek", "extraCSS": "0"}, {
                     "icon": "bar_chart",
-                    "text": "Staafgrafiek"
-                }, {"icon": "bar_chart", "text": "Horizontale staafgrafiek"}, {
+                    "text": "Staafgrafiek",
+                    "extraCSS": "0"
+                }, {"icon": "bar_chart", "text": "Horizontale staafgrafiek", "extraCSS": "rotate(90deg) !important"}, {
                     "icon": "donut_large",
-                    "text": "Donutgrafiek"
-                }, {"icon": "pie_chart", "text": "Taartgrafiek"}],
+                    "text": "Donutgrafiek","extraCSS": "0"
+                }, {"icon": "pie_chart", "text": "Taartgrafiek","extraCSS": "0"}],
                 radioGroup: 1,
                 displayOptions: [{
                     "Radiobuttons": [
@@ -205,7 +204,7 @@
             }
         },
         methods: {
-            testExport(number){
+            exportDashboard(number){
                 const vm = this;
                 this.exportStyle =  "border: 0.1rem solid rgba(0,0,0,0.23) !important;";
                 setTimeout(function(){
@@ -216,16 +215,16 @@
             }, exportAsImg(number){
                 const options = {
                     type: 'dataURL',
-                    backgroundColor: null,
+                    backgroundColor: '#fff',
                 };
                 if(number !== -1){
                     this.$html2canvas(this.$refs[number][0], options).then(function (canvas) {
-                        saveAs(canvas, 'Overview_ProductSurvey' + '.png');
+                        saveAs(canvas, 'Overview_ProductSurvey' + '.jpeg');
                     });
 
                 } else {
                     this.$html2canvas(this.$refs.toPrint, options).then(function (canvas) {
-                        saveAs(canvas, 'Overview_ProductSurvey' + '.png');
+                        saveAs(canvas, 'Overview_ProductSurvey' + '.jpeg');
                     });
                 }
                 function saveAs(uri, filename) {
@@ -273,11 +272,8 @@
                     this.chartArray.charts[index].series[0].label.formatter = '{d}%'
                 }
             },
-
-            toLine(graph, option) {
-
+            changeGraph(graph, option) {
                 const grafiek = this.chartArray.charts[graph];
-
                 this.AddMiddleLine(graph);
                 //Reset Graph
                 grafiek.chartType = option;
@@ -291,29 +287,15 @@
                     grafiek.radioGroup = 0;
                     grafiek.series[0].label.show = false;
                 }
-                if (option === 0) {
-
-                    console.log('wauw');
-                    // grafiek.series[0].type = 'line';
-                    //  grafiek.series[0].type = 'line';
-                    //  grafiek.series[0].type = 'bar';
-                    //  grafiek.series[0].itemStyle.borderWidth = 0;
-
-                }
-              else if (option === 1) {
-
+              if (option === 1) {
                     grafiek.series[0].type = 'bar';
                     grafiek.series[0].itemStyle.borderWidth = 0;
-
                 } else if (option === 2) {
-
                     grafiek.series[0].type = 'bar';
                    grafiek.xAxis.type = 'value';
                     grafiek.yAxis.type = 'category';
                     grafiek.series[0].itemStyle.borderWidth = 0;
                     grafiek.yAxis.data = grafiek.xAxis.data;
-
-
                 } else if (option === 3) {
                     grafiek.series[0].markLine.data = null;
                     grafiek.series[0].itemStyle.borderWidth = 2.3;
@@ -331,20 +313,16 @@
                 }
             },
 
-            drawCharts() {
+            updateData() {
                 for (let chart in this.chartArray.charts) {
-                    if (this.chartArray.charts[chart].chartType > 0) {
+                    let allowed = 0;
+                    if (this.chartArray.charts[chart].chartType < 5) {
                         this.chartArray.charts[chart].series[0].data = this.reactiveData[chart].questionAnswers;
-                        let allowed = 0;
+
                         for (let optie in this.reactiveData[chart].questionAnswers) {
                             if (this.reactiveData[chart].questionAnswers[optie].value !== null) {
                                 allowed++;
                             }
-                        }
-                        if (allowed === 0) {
-                            this.chartArray.charts[chart].zerovalues = true;
-                        } else {
-                            this.chartArray.charts[chart].zerovalues = false
                         }
                     }else {
                          //Wanneer het een tekstvak is
@@ -352,13 +330,20 @@
                         for(let answer in this.reactiveData[chart].questionAnswers){
                             if (this.reactiveData[chart].questionAnswers[answer] != null) {
                                 answerArray.push(this.reactiveData[chart].questionAnswers[answer]);
+                                allowed++;
                             }
                            this.chartArray.charts[chart].answers = answerArray;
                         }
                     }
+                    if (allowed === 0) {
+                        this.chartArray.charts[chart].zerovalues = true;
+                    } else {
+                        this.chartArray.charts[chart].zerovalues = false
+                    }
                 }
+
             },
-            initOverview(){
+            initDashboard(){
                 this.chartArray = {
                     charts: []
                 };
@@ -371,15 +356,11 @@
                             }
                         }
                         const chart = {
-                            oneperRow: false,
-                            twoperRow: false,
-                            threeperRow: false,
-                            zerovalues: false,
-                            menuShow: false,
-                            mediumShow: false,
-                            menuNumber: 1,
-                            radioGroup: 2,
-                            chartType: 5,
+                            zerovalues: false, //Wanneer er geen data in zit
+                            menuShow: false, //Of het editmenu geshowed moet worden
+                            menuNumber: 0, //Waar de gebruiker is op het menu
+                            radioGroup: 2, //Welke optie is ingesteld bij weergave radiobuttons
+                            chartType: 5, //Wat voor type de vraag is, 5 beteketne vraag
                             answers: answerArray
                         };
                         this.chartArray.charts.push(chart)
@@ -394,12 +375,10 @@
                         }
                         if (allowed > 0) {
                             const chart = {
-                                bigDiv: false,
-                                isList: false,
                                 zerovalues: false,
                                 menuShow: false,
                                 mediumShow: false,
-                                menuNumber: 1,
+                                menuNumber: 0,
                                 radioGroup: 2,
                                 chartType: 3,
                                 legend: {},
@@ -412,10 +391,7 @@
                                 series: [{
                                     type: 'pie',
                                     radius: ['45%', '75%'],
-                                    // color: ["#ea6767", "#55b4df", "#f89d92", "#2e7291"],
-                                    color:["#f64a48", "#58c0eb","#475a64", "#33658A"],
-                                    //F8C7CC
-                                    //FF8360
+                                    color:["#f64a48", "#58c0eb","#475a64", "#33658A", "#FF8360"],
                                     data: this.reactiveData[key].questionAnswers,
                                     itemStyle: {
                                         borderColor: 'white',
@@ -440,7 +416,6 @@
                                         data: null
                                     }
                                 }]
-
                             };
                             if (this.reactiveData[key].Type > 0) {
                                 const grafiek = chart;
@@ -466,19 +441,16 @@
             }
         },created() {
 
-            this.initOverview();
+            this.initDashboard();
             this.$store.watch(this.$store.getters.getData, configuredSurvey => {
                 this.reactiveData = configuredSurvey;
-
-                this.drawCharts();
+                this.updateData();
             });
             this.$store.watch(this.$store.getters.getReset, reset => {
-                console.log('resetted');
-                this.initOverview();
+                this.initDashboard();
             })
         }, computed :{
             checkViewWidth(){
-
                 if (this.$vuetify.breakpoint.xsOnly){
                     this.phoneDetected = true;
                 }  else {
@@ -568,7 +540,7 @@
    .textCard li:nth-child( odd ) {
         background: #fafafa;
     }
-    .bigboy {
+    .chartContainer {
         width: 100%;
     }
     .uitschuifDiv {
@@ -577,6 +549,24 @@
         background-color: #EEEEEE;
         overflow: hidden;
         padding-bottom: 10px;
+    }
+    .graphButtonContainer{
+        margin-bottom: 10px;
+    }
+    .graphButton {
+        padding: 16px;
+        border:  0.1rem solid rgba(0,0,0,0.23);
+        display:inline-block;
+        border-radius: 5px;
+        transition: .2s;
+        cursor: pointer;
+    }
+    .graphButton:hover{
+        background: rgba(255,77,77, 0.60);
+    }
+    .graphButtonActive {
+        background: rgba(255,77,77, 0.60);
+        border:  0.1rem solid #ff4d4d !important;
     }
 
 </style>

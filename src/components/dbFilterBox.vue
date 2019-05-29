@@ -59,9 +59,7 @@
             <h3>FILTERS</h3>
 
             <div class="filterList">
-
-
-                <v-menu offset-y v-for="(filter,index)  in $store.state.filters">
+                <v-menu offset-x top v-for="(filter,index)  in $store.state.filters" class="filterContainer" >
                     <template v-slot:activator="{ on }" >
                         <div
                                 color="#38C1A7"
@@ -277,13 +275,21 @@
         letter-spacing: 1px;
     }
     .chippie{
-        cursor:pointer !important;
+
+        cursor: pointer !important;
         background: #fff;
+        font-size: 12px;
         display: inline-block;
         border-radius: 22px;
+        font-weight: 600;
         padding: 8px 20px;
-        border: 2px solid #00bfa5 !important;
+        border: 3px solid #00bfa5 !important;
+        -webkit-transition: .3s;
         transition: .3s;
+        margin-right: 15px;
+    }
+    .filterContainer{
+        display: inline-block;
     }
     .chippie:hover {
         background: #00bfa5;

@@ -1,7 +1,8 @@
 <template>
     <div>
-
+        <div style="padding:0px 16px">
         <MenuIndividual @export="exportHandler" :amountSelected="selected.length"></MenuIndividual>
+
            <v-expand-transition>
             <div class="boxContainer" v-show="$store.state.searchActive">
                 <v-container fluid class="boxContent">
@@ -29,10 +30,10 @@
             </div>
         </v-expand-transition>
         <v-spacer></v-spacer>
-
-        <v-container fluid grid-list-xs style="padding: 0 !important;">
+        </div>
+        <v-container fluid grid-list-xs style="padding: 0 16px !important;">
             <v-layout wrap>
-<v-flex xs12>
+<v-flex xs12 >
                     <v-card>
                                 <v-data-table
                                 v-model="selected"
@@ -134,13 +135,16 @@
             },
             configureHeaders() {
                 let headerArray = [];
-                headerArray.push({text: "ID", value: "id"});
-                headerArray.push({text: "date and time", value: "dateTime"});
+                headerArray.push({text: "ID", value: "id", hover: "het ID van de respondent"});
+                headerArray.push({text: "datum en tijd", value: "dateTime", hover: "het tijdstip wanneer het formulier is ingevuld"});
                 const questions = this.$store.state.surveyQuestions;
                 for (let question in questions) {
-                    var text = 'Q' + question.toString() + '. ' + questions[question].title;
+                    const displayQuestion = +question +1;
+                    let text =  displayQuestion.toString() + '. ' + questions[question].title;
+
                     const headerText = text;
-                    var number = 'q' + question.toString();
+
+                    const number =  question.toString();
                     if(text.length > 35){
                         text = text.slice(0,32);
                         text = text + "...";
@@ -173,10 +177,10 @@
                                 for(let keuze in users[user].answers[answer]){
                                     answerArray.push( " " +users[user].answers[answer][keuze].toString() )
                                 }
-                                const antwoord = 'q' + answer.toString();
+                                const antwoord =  answer.toString();
                                 userArray[antwoord] = answerArray.toString()
                             }else {
-                            const antwoord = 'q' + answer.toString();
+                            const antwoord =  answer.toString();
                             userArray[antwoord] = users[user].answers[answer]
                             }
                         }
@@ -217,6 +221,8 @@ table.v-table tbody tr:hover{
 }
 .headers {
     letter-spacing: -.5px;
+    padding-top: 18px;
+    padding-bottom: 18px;
 }
 
 .choiceMenu {

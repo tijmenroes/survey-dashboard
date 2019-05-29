@@ -39,8 +39,6 @@ export const store = new Vuex.Store({
         },
         addFilter(state, {answer, question}) {
             const array = [];
-            console.log(answer);
-            console.log(question);
 
             for (let key in state.surveyAnswers) {
 
@@ -63,7 +61,6 @@ export const store = new Vuex.Store({
 
                         if (state.surveyAnswers[key].answers[question] === answer[aantal]) {
                             array.push(state.surveyAnswers[key]);
-                            // console.log(state.surveyAnswers[key]);
                         }
 
                     }
@@ -77,18 +74,10 @@ export const store = new Vuex.Store({
 
             state.filters.push({'Question': int, 'Answer': answer, 'Code': [{'q': question, 'a': answer}]});
             state.surveyAnswers = array;
-            // console.log(state.surveyAnswers);
-
         },delFilter(state, number){
 
             state.filters.splice(number ,1);
-            console.log(number);
-            console.log(state.filters);
-            // state.surveyAnswers = state.surveyOldData;
-
-            const questionArray = [];
             let array = [];
-            let fullArray = state.surveyOldData;
             state.surveyAnswers = state.surveyOldData;
 
             if(state.filters.length > 0) {
@@ -120,16 +109,10 @@ export const store = new Vuex.Store({
                                 if (state.surveyAnswers[key].answers[question] === answer[aantal]) {
                                     array.push(state.surveyAnswers[key])
                                 }
-
                             }
-
                         }
                     }
-
-
                 }
-                // console.log(fullArray);
-                // console.log(array);
                 state.surveyAnswers = array;
             }
         },  ConfigureAnswers(state) {
@@ -193,9 +176,6 @@ export const store = new Vuex.Store({
 
                for (let user in state.surveyAnswers) {
                     answerArray.push(state.surveyAnswers[user].answers[key]);
-                   //  console.log(state.surveyAnswers[user].answers);
-                   //
-                   // console.log(state.surveyAnswers[user].answers.indexOf(name))
                }
 
 

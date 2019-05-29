@@ -32,12 +32,12 @@
                             </div>
                         </template>
                         <v-list>
-                            <v-list-tile @click="exportImg('.png')">
-                                <v-list-tile-title>.png</v-list-tile-title>
+                            <v-list-tile @click="exportImg">
+                                <v-list-tile-title>Afbeelding (.jpeg)</v-list-tile-title>
                             </v-list-tile>
 
                             <v-list-tile @click="exportCSV()">
-                                <v-list-tile-title>.csv</v-list-tile-title>
+                                <v-list-tile-title>Excel bestand (.csv)</v-list-tile-title>
                             </v-list-tile>
                         </v-list>
                     </v-menu>
@@ -57,7 +57,6 @@
 
                 <li>
                     <div class="menuButton " @click="restorePage"> Herstel pagina</div>
-
                 </li>
                 <li>
                     <div class="selectDiv">
@@ -75,16 +74,16 @@
                         </template>
 
                         <v-list>
-                            <v-list-tile @click="emitDash" class="hidden-md-and-down">
+                            <v-list-tile @click="$emit('toDash'); weergaveStatus = 'Automatisch'" >
                                 <v-list-tile-title >Automatisch</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile @click="$emit('three-per-row'); weergaveStatus = '3 per rij'">
+                            <v-list-tile class="hidden-md-and-down" @click="$emit('three-per-row'); weergaveStatus = '3 per rij'">
                                 <v-list-tile-title>3 per rij</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile @click="$emit('two-per-row'); weergaveStatus = '2 per rij'">
+                            <v-list-tile class="hidden-sm-and-down" @click="$emit('two-per-row'); weergaveStatus = '2 per rij'">
                                 <v-list-tile-title>2 per rij</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile @click="$emit('one-per-row'); weergaveStatus = '1 per rij'">
+                            <v-list-tile  class="hidden-xs-only" @click="$emit('one-per-row'); weergaveStatus = '1 per rij'">
                                 <v-list-tile-title>1 per rij</v-list-tile-title>
                             </v-list-tile>
                         </v-list>
@@ -126,14 +125,7 @@
             sluitbox(){
                 this.$store.state.filterActive = false;
             },
-            emitDash(){
-                this.weergaveStatus = "Automatisch";
-                this.$emit('toDash');
-            },
-            emitList(){
-                this.weergaveStatus = "1 per rij";
-                this.$emit('toList');
-            },
+
             exportImg(){
                 this.$emit('printDashboard');
 
@@ -173,7 +165,7 @@
     .menu ul li {
 
         font-weight: 600;
-        margin-left: 10px;
+        /*margin-left: 10px;*/
         margin-bottom: 10px;
         min-height: 50px;
         display: inline-block;
@@ -194,7 +186,7 @@
         border: 2px solid #455a64;
         padding: 10px 30px;
         border-radius: 22px;
-        margin-right: 10px;
+        margin-right: 15px;
         margin-bottom: 10px;
         -webkit-touch-callout: none; /* iOS Safari */
         -webkit-user-select: none; /* Safari */
