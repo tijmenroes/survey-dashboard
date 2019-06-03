@@ -10,7 +10,7 @@
             </li>
 
             <li>
-                <div class="menuButton filterButton" @click="searchItems"> Filteren</div>
+                <div class="menuButton filterButton" @click="searchItems"> <v-icon size="20" class="pr-1 " color="white">search</v-icon> Filteren</div>
             </li>
 
             <li>

@@ -1,7 +1,7 @@
 <template>
     <div>
           <div>
-              <div style="padding:0px 16px">
+              <div :style="$store.state.menuPadding">
               <MenuComponent
                              @toDash="changeRow(-1)"
                              @one-per-row="changeRow(0)"
@@ -11,23 +11,23 @@
               <FilterBox></FilterBox>
               </div>
             <v-container fluid grid-list-xs style="padding: 0 !important">
-                <v-layout ref="toPrint" row style="background-color: white" wrap v-bind="checkViewWidth">
+                <v-layout ref="toPrint" row style="background-color: white" wrap>
                     <v-flex :key="i" xs12
-                            :lg12="chart.oneperRow"  :md12="chart.oneperRow" :sm12="chart.oneperRow"
-                            :lg6="chart.twoperRow"  :md6="chart.twoperRow"
-                            :lg4="chart.threeperRow"  :sm4="chart.threeperRow"
+                            :lg12="oneperRow"  :md12="oneperRow" :sm12="oneperRow"
+                            :lg6="twoperRow"  :md6="twoperRow"
+                            :lg4="threeperRow"  :sm4="threeperRow"
                             lg3 sm6 md4
-                            :pl-3="!phoneDetected" :pr-3="!phoneDetected" pb-4 v-for="(chart,i) in chartArray.charts"
+                            :pl-3="!$store.state.phoneDetected" :pr-3="!$store.state.phoneDetected" pb-4 v-for="(chart,i) in chartArray.charts"
                             :ref="i" >
-                        <div >
+                        <div>
                         <v-expansion-panel
                                 expand
                                 v-model="panel[i]"
                         >
                             <v-expansion-panel-content :style="exportStyle">
                                 <template v-slot:header>
-                                    <div class="text-truncate">
-                                        {{i + 1}}. {{reactiveData[i].Title}}
+                                    <div>
+                                     <p class="cardTitel">  {{i + 1}}. {{reactiveData[i].Title}} </p>
                                     </div>
                                 </template>
                                 <div class="cardContent" v-if="chart.zerovalues === false">
@@ -45,8 +45,6 @@
                                             </div>
                                         </v-container>
                                     <div>
-
-
                                         <div>
                                             <v-expand-transition>
                                                 <div v-show="chart.menuShow" class="editContainer">
@@ -65,7 +63,7 @@
 
                                                     <div class="uitschuifDiv">
                                                         <v-layout row wrap v-if="chart.menuNumber === 0" class="optionContent">
-                                                            <v-flex v-for="(option, optionIndex) in options" class="graphButtonContainer">
+                                                            <v-flex v-for="(option, optionIndex) in options" shrink  class="graphButtonContainer">
                                                                 <v-tooltip bottom>
                                                                     <template v-slot:activator="{ on }">
                                                                         <div @click="changeGraph(i, optionIndex)" class="graphButton graphButtonActive"  v-if="chart.chartType === optionIndex"
@@ -99,18 +97,23 @@
                                                                              v-else disabled></v-radio>
                                                                 </v-radio-group>
                                                             </v-flex>
-                                                                <v-flex xs6>
+                                                                <v-flex xs6 >
                                                                     Weergeven
                                                                     <v-checkbox style="margin-top: 0 !important;"
-                                                                            v-model="chart.mediumShow" color="#455A64" v-if="chart.chartType < 3" label="Gemiddelde" @change="AddMiddleLine(i)"></v-checkbox>
+                                                                            v-model="chart.mediumShow" color="#455A64" v-if="chart.chartType < 3"
+                                                                                hide-details label="Gemiddelde" @change="AddMiddleLine(i)"></v-checkbox>
+
+                                                                            <v-checkbox style="margin-top: 0 !important;"
+                                                                                        v-model="chart.mediumShow" color="#455A64"  label="Gemiddelde"  v-else hide-details disabled></v-checkbox>
+                                                                    </v-tooltip>
                                                                     <v-checkbox style="margin-top: 0 !important;"
-                                                                                v-model="chart.mediumShow" color="#455A64" v-else label="Gemiddelde" disabled></v-checkbox>
+                                                                                v-model="chart.tableShow" color="#455A64" label="Tabel" ></v-checkbox>
                                                                 </v-flex>
                                                         </v-layout>
                                                     </div>
                                                         <div class="backButtonContainer">
                                                             <div class="chartbutton backbutton" @click="chart.menuShow =! chart.menuShow">
-                                                                Sluit
+                                                                Sluiten
                                                             </div>
                                                         </div>
 
@@ -123,6 +126,26 @@
                                             :options="chartArray.charts[i]" autoresize
                                             class="chartContainer"
                                             ></v-chart>
+                                        <div v-if="chart.tableShow">
+                                            <table>
+                                                <thead></thead>
+                                            </table>
+                                            <v-data-table
+                                                    :headers="headers"
+                                                    :items="chart.series[0].data"
+                                                    rows-per-page-text="items per pagina"
+                                                    :rows-per-page-items="amountOfRowsDataTable"
+                                                    hide-actions
+                                                    item-key="name"
+                                            >
+                                                <template v-slot:items="props">
+                                                    <tr @click="props.expanded = !props.expanded">
+                                                        <td >{{ props.item.name }}</td>
+                                                        <td >{{ props.item.value }}</td>
+                                                    </tr>
+                                                </template>
+                                            </v-data-table>
+                                        </div>
                                     </div>
                                     <div v-else>
                                         <v-container v-if="chart.menuShow === false">
@@ -134,7 +157,6 @@
                                                    {{data}}
                                                </li>
                                            </ul>
-
                                     </div>
                                 </div>
                                 <div class="cardContent" v-else>
@@ -149,7 +171,6 @@
                 </v-layout>
             </v-container>
         </div>
-
     </div>
 </template>
 
@@ -174,7 +195,6 @@
         },
         data() {
             return {
-                phoneDetected: false,
                 options: [{"icon": "show_chart", "text": "Lijngrafiek", "extraCSS": "0"}, {
                     "icon": "bar_chart",
                     "text": "Staafgrafiek",
@@ -183,24 +203,18 @@
                     "icon": "donut_large",
                     "text": "Donutgrafiek","extraCSS": "0"
                 }, {"icon": "pie_chart", "text": "Taartgrafiek","extraCSS": "0"}],
-                radioGroup: 1,
-                displayOptions: [{
-                    "Radiobuttons": [
-                        {"text": "percentages", "value": true},
-                        {"text": "cijfers", "value": false},
-                        {"text": "geen", "value": false}
-                    ]
-                }
-                ],
                 buttons: ["Grafiektype", "Weergave"],
                 chartArray: {
                     charts: []
                 },
-                panel: [],
-                qData: [],
+                headers: [{text: "Namen", value: "name", sortable: false},{text: "Aantal", value: "amount", sortable: false}],
+                amountOfRowsDataTable: [{"text":"$vuetify.dataIterator.rowsPerPageAll","value":-1}],
+            panel: [],
                 exportStyle: "border: none" ,
-                menuNumber: 0,
-                reactiveData: this.$store.state.configuredSurvey
+                reactiveData: this.$store.state.configuredSurvey,
+                oneperRow: false,
+                twoperRow: false,
+                threeperRow: false,
             }
         },
         methods: {
@@ -248,11 +262,10 @@
                 if(key > -1) {
                     array[key] = true;
                 }
-                for(let key in this.chartArray.charts){
-                    this.chartArray.charts[key].oneperRow = array[0];
-                    this.chartArray.charts[key].twoperRow = array[1];
-                    this.chartArray.charts[key].threeperRow = array[2];
-                }
+                    this.oneperRow = array[0];
+                    this.twoperRow = array[1];
+                    this.threeperRow = array[2];
+
             },
             AddMiddleLine(index){
                 if(this.chartArray.charts[index].mediumShow){
@@ -356,6 +369,9 @@
                             }
                         }
                         const chart = {
+                            oneperRow: false,
+                            twoperRow: false,
+                            threeperRow: false,
                             zerovalues: false, //Wanneer er geen data in zit
                             menuShow: false, //Of het editmenu geshowed moet worden
                             menuNumber: 0, //Waar de gebruiker is op het menu
@@ -375,9 +391,13 @@
                         }
                         if (allowed > 0) {
                             const chart = {
+                                oneperRow: false,
+                                twoperRow: false,
+                                threeperRow: false,
                                 zerovalues: false,
                                 menuShow: false,
                                 mediumShow: false,
+                                tableShow: false,
                                 menuNumber: 0,
                                 radioGroup: 2,
                                 chartType: 3,
@@ -447,21 +467,24 @@
                 this.updateData();
             });
             this.$store.watch(this.$store.getters.getReset, reset => {
+                this.oneperRow = false;
+                this.twoperRow = false;
+                this.threeperRow = false;
+
                 this.initDashboard();
             })
-        }, computed :{
-            checkViewWidth(){
-                if (this.$vuetify.breakpoint.xsOnly){
-                    this.phoneDetected = true;
-                }  else {
-                    this.phoneDetected = false;
-                }
-            }
-        }
+        },
     }
 </script>
 
 <style scoped>
+    .theme--light.v-messages{
+     min-height: 0 !important;
+    }
+    .cardTitel {
+        font-size: 13px;
+        font-weight: bold;
+    }
     .tabList{
         display:inline-block;
         float: right;
@@ -512,7 +535,7 @@
         color: white;
         font-size: 11px;
         border-radius: 10px;
-        margin-left: 10px;
+        margin-right: 10px;
         font-weight: 500;
         float: right;
         letter-spacing: 0.015rem;
@@ -554,18 +577,24 @@
         margin-bottom: 10px;
     }
     .graphButton {
-        padding: 16px;
+        padding: 11px;
         border:  0.1rem solid rgba(0,0,0,0.23);
         display:inline-block;
         border-radius: 5px;
+        margin-right: 14px;
         transition: .2s;
         cursor: pointer;
     }
     .graphButton:hover{
-        background: rgba(255,77,77, 0.60);
+        background: rgba(255,77,77, 1);
+        border:  0.1rem solid #ff4d4d !important;
+    }
+    .graphButton:hover .theme--light.v-icon{
+        color: white !important;
+        caret-color: white !important;
     }
     .graphButtonActive {
-        background: rgba(255,77,77, 0.60);
+        background: rgba(255,77,77, 1);
         border:  0.1rem solid #ff4d4d !important;
     }
 

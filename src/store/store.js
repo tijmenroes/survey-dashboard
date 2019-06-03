@@ -6,106 +6,79 @@ Vue.use(Vuex);
 
 export const store = new Vuex.Store({
     state: {
-        //Antwoorden voor beide views
+        //states voor beide views
         surveyAnswers: [],
         surveyQuestions: [],
         surveyOldData: [],
-        //Props voor dashboard
+        //states voor dashboard
         configuredSurvey: [],
         filters: [],
         filterActive: false,
         showFilterMenu: true,
         reset: 0,
-        //Props voor individual View
+        //states voor individual View
         individualData: [],
         searchActive: false,
-
+        //states voor veranderen layout
+        menuPadding: "padding: 0 0",
+        phoneDetected: false,
+        //Loading state
         loading: false,
-
     }, mutations: {
-        setUserData(state, users){
-            state.surveyAnswers  = users;
+        setUserData(state, users) {
+            state.surveyAnswers = users;
             state.surveyOldData = users;
-
         },
-        setSurveyQuestions( state, questions){
-           state.surveyQuestions = questions;
+        setSurveyQuestions(state, questions) {
+            state.surveyQuestions = questions;
             for (let key in state.surveyQuestions) {
-
-                if(state.surveyQuestions[key].hasOther === true) {
+                if (state.surveyQuestions[key].hasOther === true) {
                     state.surveyQuestions[key].choices.push('other');
                 }
             }
         },
         addFilter(state, {answer, question}) {
             const array = [];
-
             for (let key in state.surveyAnswers) {
-
                 for (let aantal in answer) {
-
-                    if(typeof state.surveyAnswers[key].answers[question] === "object" ) {
-
-                            for (let entry in state.surveyAnswers[key].answers) {
-
-                                if(typeof state.surveyAnswers[key].answers[question][entry] === "string" ) {
-
+                    if (typeof state.surveyAnswers[key].answers[question] === "object") {
+                        for (let entry in state.surveyAnswers[key].answers) {
+                            if (typeof state.surveyAnswers[key].answers[question][entry] === "string") {
                                 if (state.surveyAnswers[key].answers[question][entry] === answer[aantal]) {
-
                                     array.push(state.surveyAnswers[key])
                                 }
                             }
-                            }
-
-                    } else{
-
+                        }
+                    } else {
                         if (state.surveyAnswers[key].answers[question] === answer[aantal]) {
                             array.push(state.surveyAnswers[key]);
                         }
-
                     }
-
                 }
             }
-            //Push in filters array
-
-           //question to int to display it right. care.
             let int = +question + 1;
-
             state.filters.push({'Question': int, 'Answer': answer, 'Code': [{'q': question, 'a': answer}]});
             state.surveyAnswers = array;
-        },delFilter(state, number){
-
-            state.filters.splice(number ,1);
+        }, delFilter(state, number) {
+            state.filters.splice(number, 1);
             let array = [];
             state.surveyAnswers = state.surveyOldData;
-
-            if(state.filters.length > 0) {
+            if (state.filters.length > 0) {
 
                 for (let filter in state.filters) {
                     const question = state.filters[filter].Code[0].q;
                     const answer = state.filters[filter].Code[0].a;
-
-
                     for (let key in state.surveyAnswers) {
-
                         for (let aantal in answer) {
-
-                            if(typeof state.surveyAnswers[key].answers[question] === "object" ) {
-
+                            if (typeof state.surveyAnswers[key].answers[question] === "object") {
                                 for (let entry in state.surveyAnswers[key].answers) {
-
-                                    if(typeof state.surveyAnswers[key].answers[question][entry] === "string" ) {
-
+                                    if (typeof state.surveyAnswers[key].answers[question][entry] === "string") {
                                         if (state.surveyAnswers[key].answers[question][entry] === answer[aantal]) {
-
                                             array.push(state.surveyAnswers[key])
                                         }
                                     }
                                 }
-
-                            } else{
-
+                            } else {
                                 if (state.surveyAnswers[key].answers[question] === answer[aantal]) {
                                     array.push(state.surveyAnswers[key])
                                 }
@@ -115,30 +88,31 @@ export const store = new Vuex.Store({
                 }
                 state.surveyAnswers = array;
             }
-        },  ConfigureAnswers(state) {
+        }, ConfigureAnswers(state) {
 
             state.configuredSurvey = [];
             const dataArray = [];
+
             function countInArray(array, what) {
                 let count = 0;
                 let dataEntry = {};
 
-                    for (var i = 0; i < array.length; i++) {
+                for (var i = 0; i < array.length; i++) {
 
-                        if(typeof array[i]  === "object"){
-                            for(let entry in array[i]){
-                                    if (array[i][entry] === what) {
-                                        count++;
-                                    }
-                            }
-                        } else {
-                            if (array[i] === what) {
+                    if (typeof array[i] === "object") {
+                        for (let entry in array[i]) {
+                            if (array[i][entry] === what) {
                                 count++;
                             }
                         }
+                    } else {
+                        if (array[i] === what) {
+                            count++;
+                        }
                     }
+                }
 
-                if(count > 0 ) {
+                if (count > 0) {
                     dataEntry = {"name": what, "value": count};
                 } else {
                     dataEntry = {"name": what, "value": null, "label": {"show": false}};
@@ -148,51 +122,41 @@ export const store = new Vuex.Store({
 
             for (let key in state.surveyQuestions) {
                 const answerArray = [];
-                 const name = state.surveyQuestions[key].name;
 
-
-                if(state.surveyQuestions[key].type === "text" || state.surveyQuestions[key].type === "comment"  ){
+                if (state.surveyQuestions[key].type === "text" || state.surveyQuestions[key].type === "comment") {
                     for (let user in state.surveyAnswers) {
-
                         answerArray.push(state.surveyAnswers[user].answers[key]);
-
-
                     }
-                    const length = answerArray.filter(function(value) { return value !== undefined }).length;
+                    const length = answerArray.filter(function (value) {
+                        return value !== undefined
+                    }).length;
 
                     dataArray.push({
                         "Title": state.surveyQuestions[key].title,
-
                         questionAnswers: answerArray,
                         Type: 5,
                         SumAnswers: length
                     });
-
                 } else {
-                let questionType = 0;
+                    let questionType = 0;
 
-               const questionArray = [];
-               let litArray = state.surveyQuestions[key].choices;
+                    const questionArray = [];
+                    let litArray = state.surveyQuestions[key].choices;
 
-               for (let user in state.surveyAnswers) {
-                    answerArray.push(state.surveyAnswers[user].answers[key]);
-               }
-
-
+                    for (let user in state.surveyAnswers) {
+                        answerArray.push(state.surveyAnswers[user].answers[key]);
+                    }
                     if (state.surveyQuestions[key].type === "rating") {
                         questionType = 2;
                         const min = state.surveyQuestions[key].rateMin;
                         const max = state.surveyQuestions[key].rateMax;
                         const optionArray = [];
                         for (let i = min; i < max + 1; i++) {
-
                             const string = i.toString();
                             optionArray.push(string);
                             const get = countInArray(answerArray, string);
-
                             questionArray.push(get);
                         }
-
                         state.surveyQuestions[key].choices = optionArray;
                     } else {
                         if (state.surveyQuestions[key].choices.length > 5) {
@@ -220,16 +184,15 @@ export const store = new Vuex.Store({
             }
 
             state.configuredSurvey = dataArray;
-        }, resetData(state){
+        }, resetData(state) {
             state.reset++;
             state.surveyAnswers = state.surveyOldData;
             state.filters = [];
-
         },
-        exportCSV(state, file){
+        exportCSV(state, file) {
             //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
             const JSONData = file;
-            const ReportTitle =  "ProductSurvey";
+            const ReportTitle = "ProductSurvey";
             const ShowLabel = true;
 
             var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
@@ -302,16 +265,11 @@ export const store = new Vuex.Store({
             document.body.removeChild(link);
 
         }
-    }, getters : {
-
+    }, getters: {
         getData: state => () => state.configuredSurvey,
-        getFilters: state => () => state.filters,
+        // getFilters: state => () => state.filters,
         getReset: state => () => state.reset,
-
-    }, actions : {
-
-
-    }
+    }, actions: {}
 
 });
 

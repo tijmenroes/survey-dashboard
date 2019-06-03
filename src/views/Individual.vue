@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div style="padding:0px 16px">
+        <div :style="$store.state.menuPadding">
         <MenuIndividual @export="exportHandler" :amountSelected="selected.length"></MenuIndividual>
 
            <v-expand-transition>
@@ -22,7 +22,7 @@
                                 ></v-text-field>
                             </v-flex>
                             <v-flex shrink>
-                                <div class="menuButton " @click="sluitBox()"> Sluit</div>
+                                <div class="menuButton sluitSearch" @click="sluitBox()"> Sluiten</div>
                             </v-flex>
                         </v-layout>
                     </dl>
@@ -31,7 +31,7 @@
         </v-expand-transition>
         <v-spacer></v-spacer>
         </div>
-        <v-container fluid grid-list-xs style="padding: 0 16px !important;">
+        <v-container fluid grid-list-xs :style="$store.state.menuPadding">
             <v-layout wrap>
 <v-flex xs12 >
                     <v-card>
@@ -229,6 +229,7 @@ table.v-table tbody tr:hover{
     width: 250px;
     margin: 0;
     padding: 0px 20px;
+    margin-bottom: 4px;
     position: relative;
 }
 
@@ -247,6 +248,9 @@ table.v-table tbody tr:hover{
     -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
     box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
     margin-bottom: 30px;
+}
+.sluitSearch{
+    margin: 10px 20px;
 }
 
 form {

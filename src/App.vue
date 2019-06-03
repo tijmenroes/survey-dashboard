@@ -12,8 +12,19 @@
                     </li>
                 </ul>
         </div>
+
+<div id="dashboard"  v-bind="checkViewWidth">
+<div v-if="$store.state.configuredSurvey.length > 0">
+      <keep-alive>
+      <Overview ref="printMe" v-if="pageNumber === 0"></Overview>
+      <Individual v-else-if="pageNumber === 1"></Individual>
+        <div v-else-if="pageNumber === 2">
+        <SurveyView></SurveyView>
+        </div>
+      </keep-alive>
+</div>
+    <v-layout v-else>
         <v-dialog
-                v-model="$store.state.loading"
                 persistent
                 width="300"
         >
@@ -31,26 +42,6 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-
-    <div id="dashboard">
-
-<div v-if="$store.state.configuredSurvey.length > 0">
-
-      <keep-alive>
-
-      <Overview ref="printMe" v-if="pageNumber === 0"></Overview>
-
-      <Individual v-else-if="pageNumber === 1"></Individual>
-
-        <div v-else-if="pageNumber === 2">
-        <SurveyView></SurveyView>
-        </div>
-
-      </keep-alive>
-
-</div>
-    <v-layout v-else>
-        Loading...
     </v-layout>
 
     </div>
@@ -81,7 +72,6 @@ export default {
   },methods:{
         logSurvey(id){
             this.$store.state.loading = true;
-            console.log(id);
             axios.all([
                 axios.get('https://survey-api.test.tc8l.nl/api/survey/questions/' + id),
                 axios.get('https://survey-api.test.tc8l.nl/api/survey/answers/' + id)
@@ -123,9 +113,18 @@ export default {
         }
     },
   created(){
-      console.log(this.source);
       this.logSurvey(this.source);
-
+    },
+    computed :{
+        checkViewWidth(){
+            if (this.$vuetify.breakpoint.xsOnly){ //Wanneer het mobile is
+                this.$store.state.menuPadding =  "padding: 0 0"; //disable padding
+                this.$store.state.phoneDetected =  true; //disable padding op dashboard vakken.
+            }  else {
+                this.$store.state.menuPadding =   "padding: 0 16px";
+                this.$store.state.phoneDetected =  false;
+            }
+        }
     }
  }
 </script>

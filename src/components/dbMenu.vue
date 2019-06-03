@@ -5,20 +5,16 @@
        <div class="menu">
            <v-layout row wrap>
 <v-flex align-self-baseline>
-
-
 <div class="leftButtons">
         <ul>
             <li>
                 <div class="menuButton " @click="sluitbox"> Terug</div>
             </li>
             <li>
-                <!--<DataFilter></DataFilter>-->
-                <div class="menuButton filterButton" @click="openFilterBox"> <v-icon small color="white">add</v-icon> Nieuwe filter</div>
+                <div class="menuButton filterButton" @click="openFilterBox"> <v-icon size="20" class="pr-1" color="white">add</v-icon> Nieuwe filter</div>
             </li>
             <li>
                 <div class="text-xs-center">
-
                     <v-menu offset-y>
                         <template v-slot:activator="{ on }">
                             <div
@@ -26,7 +22,7 @@
                                     class="menuButton text-none"
                                     v-on="on"
                             >
-                                Exporteer pagina <v-icon small color="white">
+                                Exporteren <v-icon small color="white">
                                 arrow_drop_down
                             </v-icon>
                             </div>
@@ -42,26 +38,18 @@
                         </v-list>
                     </v-menu>
                 </div>
-
-
             </li>
         </ul>
-
-
 </div>
 </v-flex>
         <v-flex>
-
         <div class="rightButtons">
             <ul>
-
                 <li>
                     <div class="menuButton " @click="restorePage"> Herstel pagina</div>
                 </li>
                 <li>
                     <div class="selectDiv">
-
-
                     <label class="label">weergave:</label>
                     <v-menu offset-y >
                         <template v-slot:activator="{ on }">
@@ -72,7 +60,6 @@
                                 {{weergaveStatus}}
                             </div>
                         </template>
-
                         <v-list>
                             <v-list-tile @click="$emit('toDash'); weergaveStatus = 'Automatisch'" >
                                 <v-list-tile-title >Automatisch</v-list-tile-title>
@@ -91,14 +78,11 @@
                     </div>
                 </li>
             </ul>
-
         </div>
                </v-flex>
            </v-layout>
-
         </div>
 </v-container>
-
 </template>
 
 <script>
@@ -120,7 +104,7 @@
 
             },
             openFilterBox(){
-                this.$store.state.filterActive = true;
+                this.$store.state.filterActive =! this.$store.state.filterActive;
             },
             sluitbox(){
                 this.$store.state.filterActive = false;
@@ -163,7 +147,6 @@
         /*float: left;*/
     }
     .menu ul li {
-
         font-weight: 600;
         /*margin-left: 10px;*/
         margin-bottom: 10px;
@@ -195,7 +178,10 @@
         -ms-user-select: none; /* Internet Explorer/Edge */
         user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
-
+    }
+    .rightButtons .menuButton{
+        margin-left: 15px;
+        margin-right: 0;
     }
     .leftButtons  {
         float:left;
@@ -218,12 +204,10 @@
         margin-bottom: 10px;
         border: solid 2px #dadada;
     }
-
     .menu {
         /*margin-bottom: 30px;*/
         min-height: 75px;
         padding: 0;
-
     }
     .selectDiv{
         display:inline-block;

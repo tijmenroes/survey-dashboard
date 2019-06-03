@@ -3,7 +3,7 @@
             <v-expand-transition >
                 <div class="boxContainer" v-show="$store.state.filterActive">
             <v-container fluid class="boxContent">
-                <dl class="inputje" v-if="showMenu">
+                <dl class="inputContainer" v-if="showMenu">
                 <v-layout row wrap grow>
                     <v-flex shrink>
                                         <v-autocomplete
@@ -20,7 +20,7 @@
                     </v-flex>
 
                     <v-flex shrink >
-                        <div class="menuButton " @click="$store.state.filterActive = false"> Sluiten</div>
+                        <div class="menuButton sluitButton" @click="$store.state.filterActive = false"> Sluiten</div>
                     </v-flex>
                 </v-layout>
                 </dl>
@@ -28,11 +28,10 @@
                     {{+filterStatus + 1}}. {{$store.state.configuredSurvey[filterStatus].Title}}
                     <div class="mt-2">
                         <v-layout column row>
-
                         <v-flex xs6  lg8 v-for="(keuzes, index) in $store.state.configuredSurvey[filterStatus].questionChoices">
                             <v-checkbox
                                     :label="keuzes" :value="$store.state.configuredSurvey[filterStatus].questionChoices[index]"
-                                    color="#707171" v-model="filterVModel[filterStatus].choices" class="selectievakje">
+                                    color="#707171" v-model="filterVModel[filterStatus].choices" class="selectievakje"  >
                             </v-checkbox>
                         </v-flex>
                         </v-layout>
@@ -67,8 +66,6 @@
                                 v-on="on"
                         >
                             Q{{filter.Question}}: {{filter.Answer.toString()}}
-
-
                             <v-icon   small color="455a64" class="chipIcon">
                             more_vert
                         </v-icon>
@@ -78,13 +75,11 @@
                         <v-list-tile @click="editFilter(filter.Code[0].q, filter.Answer)">
                             <v-list-tile-title>Filter aanpassen</v-list-tile-title>
                         </v-list-tile>
-
                         <v-list-tile @click="delFilter(index)">
                             <v-list-tile-title style="color: #f64a48">Filter verwijderen</v-list-tile-title>
                         </v-list-tile>
                     </v-list>
                 </v-menu>
-
             </div>
         </div>
     </div>
@@ -118,7 +113,6 @@
         },
         methods: {
             editFilter(index){
-                console.log(index);
                 this.showMenu = false;
                 this.$store.state.filterActive = true;
                 this.filterStatus = index;
@@ -127,10 +121,8 @@
                 this.showMenu = false;
                 this.$store.state.filterActive = true;
                 this.filterStatus = index;
-
             }, saveFilter(answers, question) {
                 this.showMenu = true;
-                // this.$store.state.filterActive = false;
                 this.selectedChoice = [];
                 this.FilterConfig(answers, question);
             },discardFilter(){
@@ -138,16 +130,14 @@
                 this.$store.state.filterActive = false;
             },
             FilterConfig(answer, question) {
-                const get = this.filterExists(answer, question);
-                const filterExists = get.exists;
-
                 if (answer.length === 0) {
                     alert('Selecteer een filter!');
                 } else {
+                    const get = this.filterExists(answer, question);
+                    const filterExists = get.exists;
                     if (filterExists === false) {
                         this.$store.commit('addFilter', {answer, question});
                         this.$store.commit('ConfigureAnswers');
-                        console.log("Filter send to vuex");
                     } else if (filterExists === "bestaat") {
                         this.$store.commit('delFilter', get.number);
                         this.$store.commit('addFilter', {answer, question});
@@ -158,15 +148,12 @@
                 }
             },
             filterExists(answer, question) {
-                // console.log(answer);
-                console.log(question);
                 let outcome = {exists: '', number: null};
                 let number = null;
                 const filters = this.$store.state.filters;
                 for(let filter in filters){
                     if (typeof filters[filter] !== 'undefined') {
                         if(filters[filter].Code[0].q === question){
-                            console.log('dat is m');
                             number = filter;
                             outcome.number = filter;
                         }
@@ -176,16 +163,12 @@
                     outcome.exists = false;
                 } else {
                     if (filters[number].Code[0].a === answer) {
-
                         outcome.exists = true;
                     } else {
                         outcome.exists = "bestaat";
-
                     }
                 }
-                console.log(outcome);
                 return outcome;
-
             },
             delFilter(number) {
                 this.filterVModel[number].choices = [];
@@ -195,17 +178,14 @@
         }, created() {
             const array = [];
             const array2 = [];
-            console.log(this.$store.state.configuredSurvey);
             for (let vraag in this.$store.state.configuredSurvey) {
                 if(this.$store.state.configuredSurvey[vraag].Type  !== 5) {
-
-
                     array.push({"questionNr": vraag, choices: []});
                     array2.push(this.$store.state.configuredSurvey[vraag].Title)
                 }
             }
+            //Tekstvragen worden eruit gehaald, deze hoeven niet gefiltered te worden.
             this.searchItems = array2;
-
             this.filterVModel = array;
         }
     }
@@ -234,6 +214,9 @@
     }
     .backButton{
         padding: 8px 25px;
+    }
+    .sluitButton {
+        margin-left: 20px;
     }
     .choiceMenu {
         width: 250px;
@@ -298,9 +281,7 @@
     .chippie:hover .chipIcon{
         color: white !important;
     }
-
     form {
         width: 100%;
     }
-
 </style>
