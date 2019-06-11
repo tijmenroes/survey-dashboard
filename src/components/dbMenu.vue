@@ -57,20 +57,20 @@
                                     class="selectButton"
                                     v-on="on"
                             >
-                                {{weergaveStatus}}
+                                {{$store.state.weergaveStatus}}
                             </div>
                         </template>
                         <v-list>
-                            <v-list-tile @click="$emit('toDash'); weergaveStatus = 'Automatisch'" >
+                            <v-list-tile @click="$emit('toDash'); $store.state.weergaveStatus = 'Automatisch'" >
                                 <v-list-tile-title >Automatisch</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile class="hidden-md-and-down" @click="$emit('three-per-row'); weergaveStatus = '3 per rij'">
+                            <v-list-tile class="hidden-md-and-down" @click="$emit('three-per-row'); $store.state.weergaveStatus = '3 per rij'">
                                 <v-list-tile-title>3 per rij</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile class="hidden-sm-and-down" @click="$emit('two-per-row'); weergaveStatus = '2 per rij'">
+                            <v-list-tile class="hidden-sm-and-down" @click="$emit('two-per-row'); $store.state.weergaveStatus = '2 per rij'">
                                 <v-list-tile-title>2 per rij</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile  class="hidden-xs-only" @click="$emit('one-per-row'); weergaveStatus = '1 per rij'">
+                            <v-list-tile  class="hidden-xs-only" @click="$emit('one-per-row'); $store.state.weergaveStatus = '1 per rij'">
                                 <v-list-tile-title>1 per rij</v-list-tile-title>
                             </v-list-tile>
                         </v-list>
@@ -96,14 +96,18 @@
         },
         methods:{
             exportCSV(){
+                //Exporteert hele pagina als CSV bestand
                 this.$store.commit('exportCSV', this.$store.state.individualData);
+
             },
             restorePage(){
+                //Pagina wordt volledig hersteld
                 this.$store.commit('resetData');
                 this.$store.commit('ConfigureAnswers');
 
             },
             openFilterBox(){
+                //Filterbox open
                 this.$store.state.filterActive =! this.$store.state.filterActive;
             },
             sluitbox(){
@@ -111,6 +115,7 @@
             },
 
             exportImg(){
+                //Hele dashboard als afbeelding geëxporteerd.
                 this.$emit('printDashboard');
 
             }

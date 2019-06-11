@@ -22,6 +22,7 @@ export const store = new Vuex.Store({
         //states voor veranderen layout
         menuPadding: "padding: 0 0",
         phoneDetected: false,
+        weergaveStatus: "Automatisch",
         //Loading state
         loading: false,
     }, mutations: {
@@ -38,6 +39,7 @@ export const store = new Vuex.Store({
             }
         },
         addFilter(state, {answer, question}) {
+            //Voeg een filter toe, answer = Geselecteerde antwoord door de user. Question = vraagnummer.
             const array = [];
             for (let key in state.surveyAnswers) {
                 for (let aantal in answer) {
@@ -60,6 +62,7 @@ export const store = new Vuex.Store({
             state.filters.push({'Question': int, 'Answer': answer, 'Code': [{'q': question, 'a': answer}]});
             state.surveyAnswers = array;
         }, delFilter(state, number) {
+            //Verwijder een filter.
             state.filters.splice(number, 1);
             let array = [];
             state.surveyAnswers = state.surveyOldData;
@@ -89,7 +92,7 @@ export const store = new Vuex.Store({
                 state.surveyAnswers = array;
             }
         }, ConfigureAnswers(state) {
-
+            //Configureer de answers zodat deze op het dashboard gedisplayd kunnen worden.
             state.configuredSurvey = [];
             const dataArray = [];
 

@@ -130,10 +130,12 @@
               this.search = '';
             },
             openDialog(info) {
+                //Dialog met de informatie van de respondent wordt geopend
                 this.dialog = !this.dialog;
                 this.dialogText = info;
             },
             configureHeaders() {
+                //Headers worden zo aangepast dat ze in de data table kunnen.
                 let headerArray = [];
                 headerArray.push({text: "ID", value: "id", hover: "het ID van de respondent"});
                 headerArray.push({text: "datum en tijd", value: "dateTime", hover: "het tijdstip wanneer het formulier is ingevuld"});
@@ -153,6 +155,7 @@
                 }
                 this.headers = headerArray;
             }, configureRows(){
+                //Rijen worden zo aangepast dat ze in de data table kunnen.
                 this.rows = [];
                 const users = this.$store.state.surveyOldData;
 
@@ -192,10 +195,12 @@
 
             },
             checkTime(i) {
+                //Nul toegevoegd aan de tijd wanneer het geen 2 cijfers (6:8 wordt 06:08)
             if (i < 10) {i = "0" + i}
             return i;
             },
             exportHandler(value){
+                //Exporteer de individuele antwoorden als CSV, per selectie of alle antwoorden.
                 if(value === 1){
                     this.$store.commit('exportCSV', this.rows);
                 } else {

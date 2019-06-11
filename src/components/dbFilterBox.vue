@@ -30,13 +30,13 @@
                         <v-layout column row>
                         <v-flex xs6  lg8 v-for="(keuzes, index) in $store.state.configuredSurvey[filterStatus].questionChoices">
                             <v-checkbox
-                                    :label="keuzes" :value="$store.state.configuredSurvey[filterStatus].questionChoices[index]"
+                                    :label="keuzes" hide-details :value="$store.state.configuredSurvey[filterStatus].questionChoices[index]"
                                     color="#707171" v-model="filterVModel[filterStatus].choices" class="selectievakje"  >
                             </v-checkbox>
                         </v-flex>
                         </v-layout>
                     </div>
-                    <ul>
+                    <ul class="buttonsUnder">
                         <li>
                             <div class="saveButton menuButton" @click="saveFilter(filterVModel[filterStatus].choices, filterStatus)">
                                 Opslaan
@@ -90,7 +90,6 @@
     export default {
         watch:{
           model(){
-
               for(let vraag in this.$store.state.configuredSurvey){
                   if(this.$store.state.configuredSurvey[vraag].Title === this.model){
                    this.filterStatus = vraag;
@@ -113,23 +112,28 @@
         },
         methods: {
             editFilter(index){
+                //Wanneer de gebruiker op filter aanpassen klikt,
                 this.showMenu = false;
                 this.$store.state.filterActive = true;
                 this.filterStatus = index;
             },
             selectItem(index) {
+                //wanneer de gebruiker een vraag pickt
                 this.showMenu = false;
                 this.$store.state.filterActive = true;
                 this.filterStatus = index;
             }, saveFilter(answers, question) {
+                //Sla filter op
                 this.showMenu = true;
                 this.selectedChoice = [];
                 this.FilterConfig(answers, question);
             },discardFilter(){
+                //Filter wordt niet opgeslagen
                 this.showMenu = true;
                 this.$store.state.filterActive = false;
             },
             FilterConfig(answer, question) {
+                //Een check of de filter wel mag worden uitgevoerd, en welke functies moeten worden uitgevoerd.
                 if (answer.length === 0) {
                     alert('Selecteer een filter!');
                 } else {
@@ -148,6 +152,7 @@
                 }
             },
             filterExists(answer, question) {
+                //Een check of de filter al bestaat.
                 let outcome = {exists: '', number: null};
                 let number = null;
                 const filters = this.$store.state.filters;
@@ -171,6 +176,7 @@
                 return outcome;
             },
             delFilter(number) {
+                //Delete filter
                 this.filterVModel[number].choices = [];
                 this.$store.commit('delFilter', number);
                 this.$store.commit('ConfigureAnswers', number);
@@ -178,13 +184,14 @@
         }, created() {
             const array = [];
             const array2 = [];
+            //Tekstvragen worden eruit gehaald, deze hoeven niet gefiltered te worden.
             for (let vraag in this.$store.state.configuredSurvey) {
                 if(this.$store.state.configuredSurvey[vraag].Type  !== 5) {
                     array.push({"questionNr": vraag, choices: []});
                     array2.push(this.$store.state.configuredSurvey[vraag].Title)
                 }
             }
-            //Tekstvragen worden eruit gehaald, deze hoeven niet gefiltered te worden.
+
             this.searchItems = array2;
             this.filterVModel = array;
         }
@@ -192,6 +199,9 @@
 </script>
 
 <style scoped>
+    .buttonsUnder{
+        margin-top: 25px;
+    }
     ul {
         display:inline-block;
         padding-left: 0;
@@ -226,7 +236,7 @@
     }
     .selectievakje{
         padding: 0 !important;
-        margin-top: 0 !important;
+        margin-top: 6px !important;
     }
     .boxContent {
         padding: 0;

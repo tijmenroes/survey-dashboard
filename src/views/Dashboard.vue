@@ -1,6 +1,7 @@
 <template>
     <div>
           <div>
+
               <div :style="$store.state.menuPadding">
               <MenuComponent
                              @toDash="changeRow(-1)"
@@ -89,7 +90,7 @@
                                                                 Labels
                                                                 <v-radio-group @change="displayHandler(chart.radioGroup, i)"
                                                                                v-model="chart.radioGroup" style="margin-top: 0 !important;">
-                                                                    <v-radio small :value="0" color="#455A64" label="Geen Cijfers"></v-radio>
+                                                                    <v-radio :value="0" color="#455A64" label="Geen Cijfers"></v-radio>
                                                                     <v-radio :value="1" color="#455A64"  label="Absolute Cijfers"></v-radio>
                                                                     <v-radio :value="2" color="#455A64"  label="Percentages"
                                                                              v-if="chart.chartType > 2"></v-radio>
@@ -105,7 +106,6 @@
 
                                                                             <v-checkbox style="margin-top: 0 !important;"
                                                                                         v-model="chart.mediumShow" color="#455A64"  label="Gemiddelde"  v-else hide-details disabled></v-checkbox>
-                                                                    </v-tooltip>
                                                                     <v-checkbox style="margin-top: 0 !important;"
                                                                                 v-model="chart.tableShow" color="#455A64" label="Tabel" ></v-checkbox>
                                                                 </v-flex>
@@ -219,6 +219,7 @@
         },
         methods: {
             exportDashboard(number){
+                //Functie zet een border om de vakken en voert exportfunctie uit, daarna is border weer weg.
                 const vm = this;
                 this.exportStyle =  "border: 0.1rem solid rgba(0,0,0,0.23) !important;";
                 setTimeout(function(){
@@ -227,6 +228,7 @@
                 }, 1);
 
             }, exportAsImg(number){
+                //Afbeelding wordt geëxporteerd als afbeelding, wanneer -1 wordt meegegeven, wordt het hele dashboard geëxporteerd.
                 const options = {
                     type: 'dataURL',
                     backgroundColor: '#fff',
@@ -258,6 +260,7 @@
                 }
             },
              changeRow(key){
+                //Verandert hoeveel vakken per rij er zijn.
                 let array = [false, false, false];
                 if(key > -1) {
                     array[key] = true;
@@ -268,6 +271,7 @@
 
             },
             AddMiddleLine(index){
+                //Voegt een gemiddelde lijn aan de grafiek als dat kan
                 if(this.chartArray.charts[index].mediumShow){
                     this.chartArray.charts[index].series[0].markLine.data = [{"type": "average"}]
                 } else {
@@ -275,6 +279,7 @@
                 }
             },
             displayHandler(nummer, index) {
+                //Voert de keuzes van 'Weergave' uit.
                 if (nummer === 0) {
                     this.chartArray.charts[index].series[0].label.show = false;
                 } else if (nummer === 1) {
@@ -286,6 +291,7 @@
                 }
             },
             changeGraph(graph, option) {
+                //Veranderen van grafiek opties.
                 const grafiek = this.chartArray.charts[graph];
                 this.AddMiddleLine(graph);
                 //Reset Graph
@@ -327,6 +333,7 @@
             },
 
             updateData() {
+                //Data wordt geüpdate wanneer dat nodig is, zit vast aan een watcher.
                 for (let chart in this.chartArray.charts) {
                     let allowed = 0;
                     if (this.chartArray.charts[chart].chartType < 5) {
@@ -351,12 +358,13 @@
                     if (allowed === 0) {
                         this.chartArray.charts[chart].zerovalues = true;
                     } else {
-                        this.chartArray.charts[chart].zerovalues = false
+                        this.chartArray.charts[chart].zerovalues = false;
                     }
                 }
 
             },
             initDashboard(){
+                //Bij het opstarten, hier wordt alle data in een juiste array gezet. Zodat de vakken gedisplayd kunnen worden.
                 this.chartArray = {
                     charts: []
                 };
@@ -463,14 +471,17 @@
 
             this.initDashboard();
             this.$store.watch(this.$store.getters.getData, configuredSurvey => {
+                //Update data wanneer watcher een verandering oppakt.
+
                 this.reactiveData = configuredSurvey;
                 this.updateData();
             });
             this.$store.watch(this.$store.getters.getReset, reset => {
+                //Reset dashboard wanneer watcher een verandering oppakt.
                 this.oneperRow = false;
                 this.twoperRow = false;
                 this.threeperRow = false;
-
+                this.$store.state.weergaveStatus = "Automatisch";
                 this.initDashboard();
             })
         },

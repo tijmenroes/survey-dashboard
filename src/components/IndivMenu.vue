@@ -53,7 +53,6 @@
 
 <script>
     export default {
-        name: "MenuComponent",
         props: ["amountSelected"],
         methods:{
             searchItems(){
@@ -63,6 +62,7 @@
                 this.$store.state.searchActive = false;
             },
             exportEmit(value){
+
                 this.$emit('export', value);
             }
         }
