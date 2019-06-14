@@ -61,16 +61,16 @@
                             </div>
                         </template>
                         <v-list>
-                            <v-list-tile @click="$emit('toDash'); $store.state.weergaveStatus = 'Automatisch'" >
+                            <v-list-tile @click="$store.state.weergaveStatus = 'Automatisch'" >
                                 <v-list-tile-title >Automatisch</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile class="hidden-md-and-down" @click="$emit('three-per-row'); $store.state.weergaveStatus = '3 per rij'">
+                            <v-list-tile class="hidden-md-and-down" @click=" $store.state.weergaveStatus = '3 per rij'">
                                 <v-list-tile-title>3 per rij</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile class="hidden-sm-and-down" @click="$emit('two-per-row'); $store.state.weergaveStatus = '2 per rij'">
+                            <v-list-tile class="hidden-sm-and-down" @click="$store.state.weergaveStatus = '2 per rij'">
                                 <v-list-tile-title>2 per rij</v-list-tile-title>
                             </v-list-tile>
-                            <v-list-tile  class="hidden-xs-only" @click="$emit('one-per-row'); $store.state.weergaveStatus = '1 per rij'">
+                            <v-list-tile  class="hidden-xs-only" @click="$store.state.weergaveStatus = '1 per rij'">
                                 <v-list-tile-title>1 per rij</v-list-tile-title>
                             </v-list-tile>
                         </v-list>
@@ -131,6 +131,7 @@
         display: inline-block;
         font-weight: 400;
         padding-right: 6px;
+        color: rgba(0, 0, 0, 0.87);
     }
     .filterButton {
         background: #00bfa5 !important;

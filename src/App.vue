@@ -2,7 +2,7 @@
   <v-app class="app">
     <v-content>
         <div id="crumbpath" class="clear">
-            <h2>Formulieren</h2>
+            <h2>{{$store.state.surveyName}}</h2>
                      <ul class="pageTabs">
                     <li v-for="(button,index) in buttons"  v-if="pageNumber === index" class="active">
                         {{button}}
@@ -13,7 +13,7 @@
                 </ul>
         </div>
 
-<div id="dashboard"  v-bind="checkViewWidth">
+<div id="dashboard"  v-bind="checkViewWidth" >
 <div v-if="$store.state.configuredSurvey.length > 0">
       <keep-alive>
       <Overview ref="printMe" v-if="pageNumber === 0"></Overview>
@@ -23,26 +23,19 @@
         </div>
       </keep-alive>
 </div>
-    <v-layout v-else>
-        <v-dialog
-                persistent
-                width="300"
-        >
-            <v-card
-                    color="primary"
-                    dark
+    <div v-else class="loadingDiv">
+
+        <div class="text-xs-center">
+            <v-progress-circular
+                    name="Loading"
+            color="#ff4d4d"
+            indeterminate
+            :size="120"
+            :width="10"
             >
-                <v-card-text>
-                    Loading
-                    <v-progress-linear
-                            indeterminate
-                            color="white"
-                            class="mb-0"
-                    ></v-progress-linear>
-                </v-card-text>
-            </v-card>
-        </v-dialog>
-    </v-layout>
+            </v-progress-circular>
+        </div>
+          </div>
 
     </div>
     </v-content>
@@ -68,10 +61,12 @@ export default {
     return {
       pageNumber:0,
       buttons: ["Dashboard", "Individual"],
+      breakpoint: null,
+      isLoading: true,
     }
   },methods:{
-        logSurvey(id){
-            this.$store.state.loading = true;
+        getSurvey(id){
+            this.isLoading = true;
             axios.all([
                 axios.get('https://survey-api.test.tc8l.nl/api/survey/questions/' + id),
                 axios.get('https://survey-api.test.tc8l.nl/api/survey/answers/' + id)
@@ -92,9 +87,10 @@ export default {
                 }
                 this.$store.commit('setUserData', userArray);
                 this.$store.commit('ConfigureAnswers');
-                this.$store.state.loading = false;
+                this.isLoading = true;
             }))
            .catch(error => {
+//Dit kan je gebruiken om errors te vertonen
 
                         // error = error.toString();
                         // if(error.includes('code 500')){
@@ -113,13 +109,19 @@ export default {
         }
     },
   created(){
-      this.logSurvey(this.source);
+      this.getSurvey(this.source);
     },
     computed :{
         checkViewWidth(){
+            if(this.breakpoint !== this.$vuetify.breakpoint.name){
+                this.$store.state.weergaveStatus =  'Automatisch';
+            }
+
+            this.breakpoint = this.$vuetify.breakpoint.name;
             if (this.$vuetify.breakpoint.xsOnly){ //Wanneer het mobile is
                 this.$store.state.menuPadding =  "padding: 0 0"; //disable padding
                 this.$store.state.phoneDetected =  true; //disable padding op dashboard vakken.
+
             }  else {
                 this.$store.state.menuPadding =   "padding: 0 16px";
                 this.$store.state.phoneDetected =  false;
@@ -135,6 +137,7 @@ export default {
         padding: 20px;
         position: relative;
         font-family: 'Open Sans' , sans-serif;
+        background: white;
     }
     #crumbpath {
 
@@ -144,7 +147,12 @@ export default {
         border-bottom: 1px solid #e3e8e9;
         border-bottom: 1px solid #cecece;
     }
-
+.loadingDiv{
+    position:fixed;
+    margin: auto;
+    left: 45%;
+    top:40%;
+}
   .pageTabs{
       transition: .2s;
       position: absolute;

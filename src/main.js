@@ -21,7 +21,7 @@ new Vue({
     this.source = this.$el.attributes['source'].value;
   },
   components:{App},
-  template: '<App :source="source"/>',
+  template: '<App :source="source"/>', //App.vue wordt gerendered met het ID
   // render: h => h(App, {
   //   props:{},
   // }), //Render normally

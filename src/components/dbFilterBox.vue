@@ -1,5 +1,6 @@
 <template>
     <div>
+
             <v-expand-transition >
                 <div class="boxContainer" v-show="$store.state.filterActive">
             <v-container fluid class="boxContent">
@@ -15,6 +16,7 @@
                                                 background-color="#fff"
                                                 class="choiceMenu"
                                                 dense
+                                                hide-details
                                         >
                                         </v-autocomplete>
                     </v-flex>
@@ -38,7 +40,7 @@
                     </div>
                     <ul class="buttonsUnder">
                         <li>
-                            <div class="saveButton menuButton" @click="saveFilter(filterVModel[filterStatus].choices, filterStatus)">
+                            <div class="saveButton menuButton" @click="FilterConfig(filterVModel[filterStatus].choices, filterStatus)">
                                 Opslaan
                             </div>
                         </li>
@@ -75,7 +77,7 @@
                         <v-list-tile @click="editFilter(filter.Code[0].q, filter.Answer)">
                             <v-list-tile-title>Filter aanpassen</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="delFilter(index)">
+                        <v-list-tile @click="delFilter(filter.Code[0].q, index)">
                             <v-list-tile-title style="color: #f64a48">Filter verwijderen</v-list-tile-title>
                         </v-list-tile>
                     </v-list>
@@ -122,21 +124,19 @@
                 this.showMenu = false;
                 this.$store.state.filterActive = true;
                 this.filterStatus = index;
-            }, saveFilter(answers, question) {
-                //Sla filter op
-                this.showMenu = true;
-                this.selectedChoice = [];
-                this.FilterConfig(answers, question);
             },discardFilter(){
                 //Filter wordt niet opgeslagen
                 this.showMenu = true;
                 this.$store.state.filterActive = false;
+                this.filterVModel[this.filterStatus].choices = [];
             },
             FilterConfig(answer, question) {
                 //Een check of de filter wel mag worden uitgevoerd, en welke functies moeten worden uitgevoerd.
                 if (answer.length === 0) {
                     alert('Selecteer een filter!');
                 } else {
+                    this.showMenu = true;
+                    this.selectedChoice = [];
                     const get = this.filterExists(answer, question);
                     const filterExists = get.exists;
                     if (filterExists === false) {
@@ -175,23 +175,25 @@
                 }
                 return outcome;
             },
-            delFilter(number) {
+            delFilter(questionNumber , filterNumber) {
                 //Delete filter
-                this.filterVModel[number].choices = [];
-                this.$store.commit('delFilter', number);
-                this.$store.commit('ConfigureAnswers', number);
+                console.log(questionNumber);
+                this.filterVModel[questionNumber].choices = [];
+                this.$store.commit('delFilter', filterNumber);
+                this.$store.commit('ConfigureAnswers', filterNumber);
             }
         }, created() {
             const array = [];
             const array2 = [];
             //Tekstvragen worden eruit gehaald, deze hoeven niet gefiltered te worden.
             for (let vraag in this.$store.state.configuredSurvey) {
+                array.push({"questionNr": vraag, choices: []});
                 if(this.$store.state.configuredSurvey[vraag].Type  !== 5) {
-                    array.push({"questionNr": vraag, choices: []});
+
                     array2.push(this.$store.state.configuredSurvey[vraag].Title)
                 }
             }
-
+            console.log(array);
             this.searchItems = array2;
             this.filterVModel = array;
         }
@@ -226,7 +228,7 @@
         padding: 8px 25px;
     }
     .sluitButton {
-        margin-left: 20px;
+        margin: 10px 20px;
     }
     .choiceMenu {
         width: 250px;

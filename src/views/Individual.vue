@@ -3,6 +3,7 @@
         <div :style="$store.state.menuPadding">
         <MenuIndividual @export="exportHandler" :amountSelected="selected.length"></MenuIndividual>
 
+            <!--Filter box-->
            <v-expand-transition>
             <div class="boxContainer" v-show="$store.state.searchActive">
                 <v-container fluid class="boxContent">
@@ -29,16 +30,17 @@
                 </v-container>
             </div>
         </v-expand-transition>
-        <v-spacer></v-spacer>
+
         </div>
         <v-container fluid grid-list-xs :style="$store.state.menuPadding">
             <v-layout wrap>
 <v-flex xs12 >
                     <v-card>
+                        <!--Vuetify Data table-->
                                 <v-data-table
                                 v-model="selected"
                                 :headers="headers"
-                                no-results-text="Voor deze zoekopdracht zijn geen reacties gevonden"
+
                                 :items="rows"
                                 item-key="id"
                                 select-all
@@ -46,6 +48,13 @@
                                 :pagination.sync="pagination"
                                 :rows-per-page-text="rowsperpage"
                         >
+                                    <template v-slot:no-results>
+                                        <div :value="true">
+                                          <h3>
+                                              Deze zoekopdracht heeft geen resultaten
+                                          </h3>
+                                        </div>
+                                    </template>
                             <template slot="headerCell" slot-scope="props">
                                 <v-tooltip bottom>
                                     <template v-slot:activator="{ on }">
@@ -80,17 +89,16 @@
                     v-model="dialog"
                     width="600">
                 <v-card>
-                    <v-card-title>
-                        Antwoorden
-                    </v-card-title>
+                    <!--<v-card-title>-->
+                        <!--Antwoorden {{Hier zou je een titel kunnen neerzetten eventueel.}}-->
+                    <!--</v-card-title>-->
                     <v-card-text>
-                        <div v-for="key in headers"><p>
-                        <strong>{{key.text}}</strong>
+                        <div v-for="key in headers" :key="key.value"><p>
+                        <strong>{{key.hover}}</strong>
                             <br>
                                 {{dialogText[key.value]}}
                             </p></div>
                     </v-card-text>
-                    <v-divider></v-divider>
                 </v-card>
             </v-dialog>
         </v-container>
@@ -120,7 +128,7 @@
                 selected: [],
                 headers: [],
                 desserts: [],
-                rows: [],
+                rows: this.$store.state.individualData,
                 rowsperpage: 'Items per pagina',
 
             }
@@ -138,7 +146,7 @@
                 //Headers worden zo aangepast dat ze in de data table kunnen.
                 let headerArray = [];
                 headerArray.push({text: "ID", value: "id", hover: "het ID van de respondent"});
-                headerArray.push({text: "datum en tijd", value: "dateTime", hover: "het tijdstip wanneer het formulier is ingevuld"});
+                headerArray.push({text: "Datum en tijd", value: "dateTime", hover: "het tijdstip wanneer het formulier is ingevuld"});
                 const questions = this.$store.state.surveyQuestions;
                 for (let question in questions) {
                     const displayQuestion = +question +1;
@@ -154,50 +162,7 @@
                     headerArray.push({text: text, value: number, hover: headerText})
                 }
                 this.headers = headerArray;
-            }, configureRows(){
-                //Rijen worden zo aangepast dat ze in de data table kunnen.
-                this.rows = [];
-                const users = this.$store.state.surveyOldData;
-
-                for (let user in users) {
-                    let date = new Date(users[user].dateTime);
-                    let month = date.getMonth() + 1;
-                    month = this.checkTime(month);
-                    let day = date.getDay() + 1;
-                    day = this.checkTime(day);
-                    let yr = date.getFullYear();
-                    let m = date.getMinutes();
-                    m = this.checkTime(m);
-
-                    let h  = date.getHours();
-                    h = this.checkTime(h);
-
-                    let userArray =  {"id": user, "dateTime": day + '-' + month + '-' + yr + ' ' + h + ':'+  m };
-                    for (let answer  in users[user].answers) {
-                        if(typeof users[user].answers !== "undefined"){
-                            if(typeof users[user].answers[answer] === "object" && users[user].answers[answer] !== "null"){
-                                const answerArray = [];
-                                for(let keuze in users[user].answers[answer]){
-                                    answerArray.push( " " +users[user].answers[answer][keuze].toString() )
-                                }
-                                const antwoord =  answer.toString();
-                                userArray[antwoord] = answerArray.toString()
-                            }else {
-                            const antwoord =  answer.toString();
-                            userArray[antwoord] = users[user].answers[answer]
-                            }
-                        }
-                    }
-                    this.rows.push(userArray);
-
-                }
-                this.$store.state.individualData = this.rows;
-
-            },
-            checkTime(i) {
-                //Nul toegevoegd aan de tijd wanneer het geen 2 cijfers (6:8 wordt 06:08)
-            if (i < 10) {i = "0" + i}
-            return i;
+            }, configureRows() {
             },
             exportHandler(value){
                 //Exporteer de individuele antwoorden als CSV, per selectie of alle antwoorden.

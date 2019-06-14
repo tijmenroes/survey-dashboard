@@ -1,14 +1,9 @@
 <template>
     <div>
-          <div>
 
+              <div>
               <div :style="$store.state.menuPadding">
-              <MenuComponent
-                             @toDash="changeRow(-1)"
-                             @one-per-row="changeRow(0)"
-                             @two-per-row="changeRow(1)"
-                             @three-per-row="changeRow(2)"
-                             @printDashboard="exportDashboard(-1)"></MenuComponent>
+              <MenuComponent @printDashboard="exportDashboard(-1)"></MenuComponent>
               <FilterBox></FilterBox>
               </div>
             <v-container fluid grid-list-xs style="padding: 0 !important">
@@ -50,7 +45,7 @@
                                             <v-expand-transition>
                                                 <div v-show="chart.menuShow" class="editContainer">
                                                     <ul class="tabList">
-                                                        <li v-for="(button,index) in buttons" @click="chart.menuNumber = index" class="optionsTabs ">
+                                                        <li v-for="(button,index) in buttons" :key="index" @click="chart.menuNumber = index" class="optionsTabs ">
                                                              <span class="tabActive normaltab" v-if="chart.menuNumber === index">
                                                     {{button}}
                                                     </span>
@@ -58,13 +53,11 @@
                                                     </span>
                                                         </li>
                                                     </ul>
-                                                    <span v-for="(button,index) in buttons" @click="chart.menuNumber = index" class="optionsTabs ">
-
+                                                    <span v-for="(button,index) in buttons" :key="index" @click="chart.menuNumber = index" class="optionsTabs ">
                                                     </span>
-
                                                     <div class="uitschuifDiv">
                                                         <v-layout row wrap v-if="chart.menuNumber === 0" class="optionContent">
-                                                            <v-flex v-for="(option, optionIndex) in options" shrink  class="graphButtonContainer">
+                                                            <v-flex v-for="(option, optionIndex) in options" :key="optionIndex" shrink  class="graphButtonContainer">
                                                                 <v-tooltip bottom>
                                                                     <template v-slot:activator="{ on }">
                                                                         <div @click="changeGraph(i, optionIndex)" class="graphButton graphButtonActive"  v-if="chart.chartType === optionIndex"
@@ -103,7 +96,6 @@
                                                                     <v-checkbox style="margin-top: 0 !important;"
                                                                             v-model="chart.mediumShow" color="#455A64" v-if="chart.chartType < 3"
                                                                                 hide-details label="Gemiddelde" @change="AddMiddleLine(i)"></v-checkbox>
-
                                                                             <v-checkbox style="margin-top: 0 !important;"
                                                                                         v-model="chart.mediumShow" color="#455A64"  label="Gemiddelde"  v-else hide-details disabled></v-checkbox>
                                                                     <v-checkbox style="margin-top: 0 !important;"
@@ -116,7 +108,6 @@
                                                                 Sluiten
                                                             </div>
                                                         </div>
-
                                                 </div>
                                                 </div>
                                             </v-expand-transition>
@@ -141,7 +132,8 @@
                                                 <template v-slot:items="props">
                                                     <tr @click="props.expanded = !props.expanded">
                                                         <td >{{ props.item.name }}</td>
-                                                        <td >{{ props.item.value }}</td>
+                                                        <td v-if="props.item.value !== null ">{{ props.item.value }}</td>
+                                                        <td v-else>0</td>
                                                     </tr>
                                                 </template>
                                             </v-data-table>
@@ -153,7 +145,7 @@
 
                                         </v-container>
                                            <ul class="textCard">
-                                               <li v-for="data in chart.answers">
+                                               <li v-for="(data, index) in chart.answers" :key="index">
                                                    {{data}}
                                                </li>
                                            </ul>
@@ -161,7 +153,7 @@
                                 </div>
                                 <div class="cardContent" v-else>
                                     <v-container justify-space-around>
-                                        <h1 class="text-xs-center"> no data</h1>
+                                        <h2 class="text-xs-center"> Geen antwoorden</h2>
                                     </v-container>
                                 </div>
                             </v-expansion-panel-content>
@@ -195,6 +187,7 @@
         },
         data() {
             return {
+
                 options: [{"icon": "show_chart", "text": "Lijngrafiek", "extraCSS": "0"}, {
                     "icon": "bar_chart",
                     "text": "Staafgrafiek",
@@ -207,7 +200,7 @@
                 chartArray: {
                     charts: []
                 },
-                headers: [{text: "Namen", value: "name", sortable: false},{text: "Aantal", value: "amount", sortable: false}],
+                headers: [{text: "Keuze", value: "name", sortable: false},{text: "Aantal", value: "amount", sortable: false}],
                 amountOfRowsDataTable: [{"text":"$vuetify.dataIterator.rowsPerPageAll","value":-1}],
             panel: [],
                 exportStyle: "border: none" ,
@@ -233,14 +226,15 @@
                     type: 'dataURL',
                     backgroundColor: '#fff',
                 };
+                const name = this.$store.state.surveyName;
                 if(number !== -1){
                     this.$html2canvas(this.$refs[number][0], options).then(function (canvas) {
-                        saveAs(canvas, 'Overview_ProductSurvey' + '.jpeg');
+                        saveAs(canvas, name + '.jpeg');
                     });
 
                 } else {
                     this.$html2canvas(this.$refs.toPrint, options).then(function (canvas) {
-                        saveAs(canvas, 'Overview_ProductSurvey' + '.jpeg');
+                        saveAs(canvas, name + '.jpeg');
                     });
                 }
                 function saveAs(uri, filename) {
@@ -268,7 +262,6 @@
                     this.oneperRow = array[0];
                     this.twoperRow = array[1];
                     this.threeperRow = array[2];
-
             },
             AddMiddleLine(index){
                 //Voegt een gemiddelde lijn aan de grafiek als dat kan
@@ -292,6 +285,7 @@
             },
             changeGraph(graph, option) {
                 //Veranderen van grafiek opties.
+                //zie: eCharts documentation
                 const grafiek = this.chartArray.charts[graph];
                 this.AddMiddleLine(graph);
                 //Reset Graph
@@ -301,12 +295,18 @@
                 grafiek.xAxis.type = 'category';
                 grafiek.yAxis.type = 'value';
                 grafiek.series[0].type = 'line';
+                grafiek.series[0].itemStyle.borderWidth = 0;
+                grafiek.series[0].itemStyle.borderColor = 'white';
 
                 if (grafiek.series[0].label.formatter === "{d}%" && option < 3) {
                     grafiek.radioGroup = 0;
                     grafiek.series[0].label.show = false;
                 }
-              if (option === 1) {
+                if(option === 0){
+                    grafiek.series[0].itemStyle.borderWidth = 1;
+                    grafiek.series[0].itemStyle.borderColor = '#f64a48';
+                }
+              else if (option === 1) {
                     grafiek.series[0].type = 'bar';
                     grafiek.series[0].itemStyle.borderWidth = 0;
                 } else if (option === 2) {
@@ -467,7 +467,8 @@
                 }
                 this.panel = tempPanel;
             }
-        },created() {
+        },
+        created() {
 
             this.initDashboard();
             this.$store.watch(this.$store.getters.getData, configuredSurvey => {
@@ -483,7 +484,21 @@
                 this.threeperRow = false;
                 this.$store.state.weergaveStatus = "Automatisch";
                 this.initDashboard();
-            })
+            });
+            this.$store.watch(this.$store.getters.getWeergave, weergaveStatus => {
+                //Watcher die zorgt dat de juiste weergave wordt uitgevoerd.
+                const status = weergaveStatus;
+
+                if (status === 'Automatisch') {
+                    this.changeRow(-1)
+                } else if (status === '1 per rij') {
+                    this.changeRow(0)
+                } else if (status === '2 per rij') {
+                    this.changeRow(1)
+                } else if (status === '3 per rij') {
+                    this.changeRow(2)
+                }
+            });
         },
     }
 </script>

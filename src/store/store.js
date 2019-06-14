@@ -25,8 +25,13 @@ export const store = new Vuex.Store({
         weergaveStatus: "Automatisch",
         //Loading state
         loading: false,
+        surveyName: "Formulier"
     }, mutations: {
         setUserData(state, users) {
+            for(let user in users){
+                users[user].id =  user
+            }
+
             state.surveyAnswers = users;
             state.surveyOldData = users;
         },
@@ -41,13 +46,16 @@ export const store = new Vuex.Store({
         addFilter(state, {answer, question}) {
             //Voeg een filter toe, answer = Geselecteerde antwoord door de user. Question = vraagnummer.
             const array = [];
+            let usedIds = [];
             for (let key in state.surveyAnswers) {
+
                 for (let aantal in answer) {
                     if (typeof state.surveyAnswers[key].answers[question] === "object") {
                         for (let entry in state.surveyAnswers[key].answers) {
                             if (typeof state.surveyAnswers[key].answers[question][entry] === "string") {
-                                if (state.surveyAnswers[key].answers[question][entry] === answer[aantal]) {
-                                    array.push(state.surveyAnswers[key])
+                                if (state.surveyAnswers[key].answers[question][entry] === answer[aantal] && usedIds.includes(state.surveyAnswers[key].id) === false ) {
+                                    array.push(state.surveyAnswers[key]);
+                                    usedIds.push(state.surveyAnswers[key].id);
                                 }
                             }
                         }
@@ -187,15 +195,64 @@ export const store = new Vuex.Store({
             }
 
             state.configuredSurvey = dataArray;
-        }, resetData(state) {
+
+
+            //Voor de rows van individual, nodig zodat het altijd exported kan worden
+            //Rijen worden zo aangepast dat ze in de data table kunnen.
+            const rows = [];
+            const users = state.surveyOldData;
+
+            for (let user in users) {
+                let date = new Date(users[user].dateTime);
+                let month = date.getMonth() + 1;
+                month = checkTime(month);
+                let day = date.getDay() + 1;
+                day = checkTime(day);
+                let yr = date.getFullYear();
+                let m = date.getMinutes();
+                m = checkTime(m);
+
+                let h  = date.getHours();
+                h = checkTime(h);
+
+                let userArray =  {"id": user, "dateTime": day + '-' + month + '-' + yr + ' ' + h + ':'+  m };
+                for (let answer  in users[user].answers) {
+                    if(typeof users[user].answers !== "undefined"){
+                        if(typeof users[user].answers[answer] === "object" && users[user].answers[answer] !== "null"){
+                            const answerArray = [];
+                            for(let keuze in users[user].answers[answer]){
+                                answerArray.push( " " +users[user].answers[answer][keuze].toString() )
+                            }
+                            const antwoord =  answer.toString();
+                            userArray[antwoord] = answerArray.toString()
+                        }else {
+                            const antwoord =  answer.toString();
+                            userArray[antwoord] = users[user].answers[answer]
+                        }
+                    }
+                }
+                rows.push(userArray);
+
+            }
+            state.individualData = rows;
+            function checkTime(i) {
+                //Nul toegevoegd aan de tijd wanneer het geen 2 cijfers (6:8 wordt 06:08)
+                if (i < 10) {i = "0" + i}
+                return i;
+            }
+        },
+
+         resetData(state) {
             state.reset++;
             state.surveyAnswers = state.surveyOldData;
             state.filters = [];
         },
         exportCSV(state, file) {
+            //Exporteren als een CSV bestand
+
             //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
             const JSONData = file;
-            const ReportTitle = "ProductSurvey";
+            const ReportTitle = state.surveyName;
             const ShowLabel = true;
 
             var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
@@ -268,10 +325,11 @@ export const store = new Vuex.Store({
             document.body.removeChild(link);
 
         }
-    }, getters: {
+        },getters: {
         getData: state => () => state.configuredSurvey,
         // getFilters: state => () => state.filters,
         getReset: state => () => state.reset,
+        getWeergave: state => () => state.weergaveStatus
     }, actions: {}
 
 });
