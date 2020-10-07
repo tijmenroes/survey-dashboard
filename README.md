@@ -1,4 +1,7 @@
-# reporter
+# Form reporting
+
+My internship project that I did in 2019. The main goal of this project was to learn Vue, and build an expansion of a previous project to set up forms.
+
 
 ## Project setup
 ```
